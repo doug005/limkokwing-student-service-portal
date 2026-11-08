@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isRequestManager() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function validStudentRequest() {
+      let data = request.resource.data;
+      return data.keys().hasAll([
+          'studentName', 'studentId', 'email', 'serviceId', 'serviceName',
+          'description', 'requestDate', 'status', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'studentName', 'studentId', 'email', 'serviceId', 'serviceName',
+          'description', 'requestDate', 'status', 'createdAt'
+        ])
+        && data.studentName is string
+        && data.studentName.size() >= 3
+        && !data.studentName.matches('^\\s*$')
+        && data.studentName.size() <= 35
+        && !data.studentName.matches('.*[0-9].*')
+        && data.studentId is string
+        && data.studentId.matches('^9010[0-9]{5}$')
+        && data.email is string
+        && data.email.size() >= 3
+        && data.email.size() <= 254
+        && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && data.serviceId in [
+          'academic-transcript', 'recommendation-letter', 'registration-assistance',
+          'student-id-replacement', 'technical-support', 'general-enquiry'
+        ]
+        && data.serviceName is string
+        && data.serviceName.size() > 0
+        && data.serviceName.size() <= 100
+        && (
+          (data.serviceId == 'academic-transcript' && data.serviceName == 'Academic Transcript Request')
+          || (data.serviceId == 'recommendation-letter' && data.serviceName == 'Letter of Recommendation Request')
+          || (data.serviceId == 'registration-assistance' && data.serviceName == 'Registration Assistance')
+          || (data.serviceId == 'student-id-replacement' && data.serviceName == 'Student ID Replacement')
+          || (data.serviceId == 'technical-support' && data.serviceName == 'Technical Support')
+          || (data.serviceId == 'general-enquiry' && data.serviceName == 'General Enquiry')
+        )
+        && data.description is string
+        && data.description.size() >= 10
+        && data.description.size() <= 2000
+        && !data.description.matches('^\\s*$')
+        && data.requestDate is string
+        && data.requestDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.status == 'Pending'
+        && data.createdAt == request.time;
+    }
+
+    match /studentRequests/{requestId} {
+      // Students may create only a schema-validated request; they cannot list or read student data.
+      allow create: if validStudentRequest();
+      allow get, list: if isRequestManager();
+      allow update: if isRequestManager()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['Pending', 'In Progress', 'Completed', 'Rejected'];
+      allow delete: if isRequestManager();
+    }
+
+    match /admins/{userId} {
+      // A signed-in staff user may check their own administrator record only.
+      // Provision this record through a trusted Firebase Console/Admin SDK workflow.
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+  }
+}

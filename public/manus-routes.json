@@ -1,0 +1,10 @@
+{
+  "routes": [
+    { "path": "/", "title": "Home" },
+    { "path": "/services", "title": "Student services" },
+    { "path": "/services/:serviceId", "title": "Service details" },
+    { "path": "/request", "title": "Submit a request" },
+    { "path": "/confirmation", "title": "Request confirmation" },
+    { "path": "/requests", "title": "Request management" }
+  ]
+}
