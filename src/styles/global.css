@@ -1121,3 +1121,21 @@ body, .site-main, .not-found-page { background: #0F151D; color: #E8EDF4; }
 .request-dialog .icon-button { color: #C1CBD8; }
 .form-error { color: #FF9C9C; }
 .inline-button { color: #FF9C9C; }
+
+/* Final heading contrast pass */
+h1, h2, h3, h4,
+.section-heading h2,
+.process-intro h2,
+.detail-instructions__heading h2,
+.requests-table-heading h2,
+.admin-gate__intro h2,
+.config-notice strong { color: #F7FAFC; }
+.section-heading h2 em,
+.process-intro h2 em,
+.detail-instructions__heading h2 em { color: #66D9FF; }
+.service-card h3,
+.process-step h3,
+.detail-info-card strong,
+.detail-bottom-cta strong,
+.form-section-heading h2,
+.requests-table-heading h2 span { color: #F7FAFC; }
