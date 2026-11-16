@@ -1084,3 +1084,40 @@ body, .site-main, .not-found-page { background: #0F151D; color: #E8EDF4; }
 .site-footer__links a { color: #D1DCE8; }
 .site-footer__links a:hover { color: #66D9FF; }
 .site-footer__bottom { color: #8093A7; }
+
+/* Contrast pass for dark surfaces */
+.form-alert--info strong,
+.config-notice strong,
+.requests-welcome strong,
+.confirmation-reference strong,
+.confirmation-details strong,
+.request-stat strong,
+.request-student-name,
+.request-date,
+.request-dialog__reference > strong,
+.request-dialog__header h2,
+.request-dialog__details dd,
+.request-dialog__details dd a,
+.request-dialog__reason { color: #F7FAFC; }
+.config-notice p,
+.admin-gate__intro > p:last-child,
+.admin-login-form__note,
+.requests-welcome,
+.requests-welcome__secure,
+.request-dialog__reference > span,
+.request-dialog__details dt,
+.request-dialog__header .eyebrow { color: #A4B0BF; }
+.config-notice code, .form-alert code, .access-denied-panel code { background: #172535; color: #D1DCE8; }
+.sign-out-button { border-color: #415468; color: #C1CBD8; }
+.sign-out-button:hover { border-color: #66D9FF; color: #66D9FF; }
+.requests-welcome__icon { background: #172535; color: #66D9FF; }
+.requests-welcome__secure { color: #8EA3B8; }
+.requests-table-heading h2, .requests-table-heading h2 span { color: #F7FAFC; }
+.requests-table-heading h2 span { border-color: #415468; }
+.request-service-name { color: #D1DCE8; }
+.request-dialog { border-color: #3B5064; background: #151F2B; }
+.request-dialog__header, .request-dialog__reference, .request-dialog__details > div { border-color: #283543; }
+.request-dialog__details dd a { color: #66D9FF; }
+.request-dialog .icon-button { color: #C1CBD8; }
+.form-error { color: #FF9C9C; }
+.inline-button { color: #FF9C9C; }
