@@ -1298,3 +1298,6 @@ h1, h2, h3, h4,
   .delete-dialog__actions { flex-direction: column-reverse; }
   .delete-dialog__actions .button { width: 100%; }
 }
+
+/* Remove remaining dash-like decorative accents */
+.service-card__number::after { display: none !important; }
