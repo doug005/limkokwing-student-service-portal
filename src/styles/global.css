@@ -1139,3 +1139,7 @@ h1, h2, h3, h4,
 .detail-bottom-cta strong,
 .form-section-heading h2,
 .requests-table-heading h2 span { color: #F7FAFC; }
+
+/* Service overview heading uses the hero accent for maximum contrast */
+.service-overview .section-heading h2,
+.service-overview .section-heading h2 em { color: #66D9FF !important; }
