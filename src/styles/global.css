@@ -1143,3 +1143,11 @@ h1, h2, h3, h4,
 /* Service overview heading uses the hero accent for maximum contrast */
 .service-overview .section-heading h2,
 .service-overview .section-heading h2 em { color: #66D9FF !important; }
+
+/* Emphasized headings use the accessible hero accent everywhere */
+.site-main h1 em,
+.site-main h2 em,
+.site-main h3 em,
+.request-aside h2 em,
+.confirmation-card h1 em,
+.not-found-page h1 em { color: #66D9FF !important; }
