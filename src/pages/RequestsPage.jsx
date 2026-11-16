@@ -264,9 +264,8 @@ export default function RequestsPage() {
         </div>
       ) : (
         <>
-          <div className="request-console__welcome">
-            <div><span className="request-console__live"><span className="request-console__live-dot" /> Live queue</span><h2>Keep every request <em>moving.</em></h2><p>Signed in as <strong>{user.email}</strong>. Changes are synced with Firestore.</p></div>
-            <div className="request-console__secure"><ShieldCheck size={17} /><span>Authorised staff view</span></div>
+          <div className="request-console__welcome request-console__welcome--identity">
+            <div className="requests-welcome"><span className="requests-welcome__icon"><ShieldCheck size={17} /></span><span>Signed in as <strong>{user.email}</strong></span></div>
           </div>
           <div className="request-console__metrics">
             <div className="request-console__metric request-console__metric--total"><span>Total queue</span><strong>{requests.length.toString().padStart(2, '0')}</strong><small>All submitted records</small></div>
