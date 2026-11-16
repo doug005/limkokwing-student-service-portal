@@ -245,8 +245,8 @@ export default function RequestsPage() {
     <section className="shell page-section requests-page">
       <PageHeader
         eyebrow="Request management"
-        title={null}
-        description="Review student requests, follow their status, and keep each record up to date."
+        title={<>Request <em>command centre.</em></>}
+        description="A focused workspace for reviewing student requests, moving work forward, and keeping every record current."
         action={user && authorized ? <button type="button" className="sign-out-button" onClick={handleSignOut}><LogOut size={15} /> Sign out</button> : null}
       />
 
@@ -264,17 +264,17 @@ export default function RequestsPage() {
         </div>
       ) : (
         <>
-          <div className="requests-welcome-row">
-            <div className="requests-welcome"><span className="requests-welcome__icon"><ShieldCheck size={17} /></span><span>Signed in as <strong>{user.email}</strong></span></div>
-            <span className="requests-welcome__secure">Authorised staff view</span>
+          <div className="request-console__welcome">
+            <div><span className="request-console__live"><span className="request-console__live-dot" /> Live queue</span><h2>Keep every request <em>moving.</em></h2><p>Signed in as <strong>{user.email}</strong>. Changes are synced with Firestore.</p></div>
+            <div className="request-console__secure"><ShieldCheck size={17} /><span>Authorised staff view</span></div>
           </div>
-          <div className="request-stats">
-            <div className="request-stat request-stat--total"><span>Total requests</span><strong>{requests.length.toString().padStart(2, '0')}</strong><small>All submitted records</small></div>
-            {REQUEST_STATUSES.map((status) => <div className="request-stat" key={status}><span>{status}</span><strong>{(statusCounts[status] ?? 0).toString().padStart(2, '0')}</strong><small>{status === 'Pending' ? 'Awaiting review' : status === 'In Progress' ? 'Being reviewed' : status === 'Completed' ? 'Resolved requests' : 'Closed requests'}</small></div>)}
+          <div className="request-console__metrics">
+            <div className="request-console__metric request-console__metric--total"><span>Total queue</span><strong>{requests.length.toString().padStart(2, '0')}</strong><small>All submitted records</small></div>
+            {REQUEST_STATUSES.map((status) => <div className={`request-console__metric request-console__metric--${status.toLowerCase().replace(' ', '-')}`} key={status}><span>{status}</span><strong>{(statusCounts[status] ?? 0).toString().padStart(2, '0')}</strong><small>{status === 'Pending' ? 'Awaiting review' : status === 'In Progress' ? 'Being reviewed' : status === 'Completed' ? 'Resolved requests' : 'Closed requests'}</small></div>)}
           </div>
-          <div className="requests-table-heading">
-            <div><p className="eyebrow">Live from Firestore</p><h2>Submitted requests <span>{requests.length}</span></h2></div>
-            <label className="search-control search-control--table"><Search size={16} aria-hidden="true" /><span className="visually-hidden">Search requests</span><input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search requests" /></label>
+          <div className="request-console__heading">
+            <div><p className="eyebrow">Live from Firestore</p><h2>Work queue <span>{filteredRequests.length}</span></h2></div>
+            <label className="search-control search-control--table"><Search size={16} aria-hidden="true" /><span className="visually-hidden">Search requests</span><input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search by name, service, ID…" /></label>
           </div>
           {actionError && <div className="form-alert form-alert--error" role="alert"><AlertCircle size={17} />{actionError}</div>}
           {actionMessage && <div className="form-alert form-alert--success" role="status"><ShieldCheck size={17} />{actionMessage}</div>}
@@ -292,33 +292,20 @@ export default function RequestsPage() {
           ) : !loadError && filteredRequests.length === 0 ? (
             <div className="empty-state empty-state--requests"><span className="empty-state__icon"><Search size={21} /></span><h2>No matching requests</h2><p>Try searching with a different name, service, student ID, status, or reference.</p></div>
           ) : !loadError ? (
-            <div className="requests-table-wrap">
-              <table className="requests-table">
-                <thead><tr><th>Student</th><th>Service</th><th>Submitted</th><th>Status</th><th>Manage</th></tr></thead>
-                <tbody>
-                  {filteredRequests.map((request) => (
-                    <tr key={request.id}>
-                      <td><strong className="request-student-name">{request.studentName}</strong><span className="request-student-id">{request.studentId} <i aria-hidden="true">·</i> {request.email}</span></td>
-                      <td><span className="request-service-name">{request.serviceName}</span><span className="request-reference">ID {request.id.slice(0, 10)}</span></td>
-                      <td><span className="request-date">{formatDate(request.createdAt)}</span><span className="request-date--sub">Request date {formatDate(request.requestDate)}</span></td>
-                      <td><StatusBadge status={request.status} /></td>
-                      <td>
-                        <div className="request-actions">
-                          <button className="icon-button" type="button" onClick={() => setActiveRequest(request)} aria-label={`View request from ${request.studentName}`}><Eye size={17} /></button>
-                          <label className="visually-hidden" htmlFor={`status-${request.id}`}>Status for request from {request.studentName}</label>
-                          <select id={`status-${request.id}`} className="status-select" value={request.status ?? 'Pending'} disabled={busyRequestId === request.id} onChange={(event) => handleStatusChange(request.id, event.target.value)}>
-                            {REQUEST_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                          </select>
-                          <button className="icon-button icon-button--danger" type="button" disabled={busyRequestId === request.id} onClick={() => handleDelete(request)} aria-label={`Delete request from ${request.studentName}`}><Trash2 size={16} /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="request-queue">
+              {filteredRequests.map((request) => (
+                <article className={`request-queue__item request-queue__item--${(request.status ?? 'Pending').toLowerCase().replace(' ', '-')}`} key={request.id}>
+                  <div className="request-queue__marker"><span /></div>
+                  <div className="request-queue__identity"><span className="request-queue__initials">{request.studentName.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span><div><strong>{request.studentName}</strong><small>{request.studentId} · {request.email}</small></div></div>
+                  <div className="request-queue__service"><p className="eyebrow">{request.status === 'Pending' ? 'Needs review' : 'Student request'}</p><h3>{request.serviceName}</h3><span>ID {request.id.slice(0, 10)}</span></div>
+                  <div className="request-queue__date"><span>Submitted</span><strong>{formatDate(request.createdAt)}</strong><small>Request date {formatDate(request.requestDate)}</small></div>
+                  <div className="request-queue__status"><StatusBadge status={request.status} /><label className="visually-hidden" htmlFor={`status-${request.id}`}>Status for request from {request.studentName}</label><select id={`status-${request.id}`} className="status-select" value={request.status ?? 'Pending'} disabled={busyRequestId === request.id} onChange={(event) => handleStatusChange(request.id, event.target.value)}>{REQUEST_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></div>
+                  <div className="request-queue__actions"><button className="icon-button" type="button" onClick={() => setActiveRequest(request)} aria-label={`View request from ${request.studentName}`}><Eye size={17} /></button><button className="icon-button icon-button--danger" type="button" disabled={busyRequestId === request.id} onClick={() => handleDelete(request)} aria-label={`Delete request from ${request.studentName}`}><Trash2 size={16} /></button></div>
+                </article>
+              ))}
             </div>
           ) : null}
-          <div className="requests-footer-note"><ShieldCheck size={15} /><span>Student details are only visible to authorised request managers.</span><button type="button" onClick={() => window.location.reload()} title="Refresh request list"><RefreshCw size={14} /> Refresh</button></div>
+          <div className="requests-footer-note"><ShieldCheck size={15} /><span>Student details are only visible to authorised request managers.</span><button type="button" onClick={() => window.location.reload()} title="Refresh request list"><RefreshCw size={14} /> Refresh queue</button></div>
         </>
       )}
 
