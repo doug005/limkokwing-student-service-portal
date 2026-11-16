@@ -1301,3 +1301,5 @@ h1, h2, h3, h4,
 
 /* Remove remaining dash-like decorative accents */
 .service-card__number::after { display: none !important; }
+
+.service-card__number::after { content: none !important; width: 0 !important; margin: 0 !important; background: transparent !important; }
