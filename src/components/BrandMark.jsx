@@ -1,7 +1,7 @@
 export default function BrandMark({ compact = false }) {
   return (
     <span className={`brand-lockup${compact ? ' brand-lockup--compact' : ''}`}>
-      <img className="brand-logo" src="/images/limko.jpg" alt="Limkokwing University of Creative Technology" />
+      <img className="brand-logo" src="/images/limko-transparent.png" alt="Limkokwing University of Creative Technology" />
       <span className="brand-lockup__text">
         <strong>Student Services</strong>
         <small>MASERU / PORTAL</small>
