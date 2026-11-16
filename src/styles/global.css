@@ -1280,3 +1280,21 @@ h1, h2, h3, h4,
 .request-console__welcome--identity .requests-welcome { color: #A4B0BF; }
 .request-console__welcome--identity .requests-welcome strong { color: #F7FAFC; }
 .request-console__welcome--identity .requests-welcome__icon { background: #172535; color: #8DE4FF; }
+
+/* In-app delete confirmation */
+.delete-dialog-backdrop { background: rgba(3, 8, 15, .78); backdrop-filter: blur(6px); }
+.delete-dialog { width: min(460px, calc(100% - 30px)); padding: 28px 30px 25px; border: 1px solid #3B5064; border-radius: 16px; background: #151F2B; box-shadow: 0 25px 90px rgba(0,0,0,.5); }
+.delete-dialog__icon { display: inline-flex; width: 43px; height: 43px; align-items: center; justify-content: center; margin-bottom: 19px; border: 1px solid #7A4E55; border-radius: 12px; background: #291B24; color: #FF9C9C; }
+.delete-dialog .eyebrow { margin-bottom: 8px; color: #FF9C9C; }
+.delete-dialog h2 { margin: 0 0 10px; color: #F7FAFC; font-size: 28px; letter-spacing: -.04em; }
+.delete-dialog > p:not(.eyebrow) { margin: 0; color: #A4B0BF; font-size: 11px; line-height: 1.7; }
+.delete-dialog > p strong { color: #F7FAFC; }
+.delete-dialog__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+.delete-dialog__actions .button--outline { border-color: #415468; }
+.delete-dialog__actions .button--danger { border-color: #E77D85; background: #E77D85; color: #080E16; }
+.delete-dialog__actions .button--danger:hover:not(:disabled) { border-color: #FF9C9C; background: #FF9C9C; }
+@media (max-width: 520px) {
+  .delete-dialog { padding: 23px 20px 20px; }
+  .delete-dialog__actions { flex-direction: column-reverse; }
+  .delete-dialog__actions .button { width: 100%; }
+}

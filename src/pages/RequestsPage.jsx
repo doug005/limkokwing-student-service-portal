@@ -114,6 +114,28 @@ function RequestDetailsDialog({ request, onClose }) {
   );
 }
 
+function DeleteRequestDialog({ request, onCancel, onConfirm, isDeleting }) {
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Escape' && !isDeleting) onCancel();
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDeleting, onCancel]);
+
+  return (
+    <div className="dialog-backdrop delete-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !isDeleting) onCancel(); }}>
+      <section className="delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">
+        <div className="delete-dialog__icon"><Trash2 size={21} /></div>
+        <p className="eyebrow">Remove request</p>
+        <h2 id="delete-dialog-title">Delete this request?</h2>
+        <p id="delete-dialog-description">This will permanently remove the request from <strong>{request.studentName}</strong> for <strong>{request.serviceName}</strong>. This action cannot be undone.</p>
+        <div className="delete-dialog__actions"><Button variant="outline" onClick={onCancel} disabled={isDeleting}>Keep request</Button><Button className="button--danger" onClick={onConfirm} disabled={isDeleting}><Trash2 size={15} />{isDeleting ? 'Deleting…' : 'Delete request'}</Button></div>
+      </section>
+    </div>
+  );
+}
+
 export default function RequestsPage() {
   const [user, setUser] = useState(null);
   const [authResolved, setAuthResolved] = useState(!isFirebaseConfigured);
@@ -126,6 +148,7 @@ export default function RequestsPage() {
   const [actionMessage, setActionMessage] = useState('');
   const [busyRequestId, setBusyRequestId] = useState('');
   const [activeRequest, setActiveRequest] = useState(null);
+  const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -217,8 +240,6 @@ export default function RequestsPage() {
   }
 
   async function handleDelete(request) {
-    const confirmed = window.confirm(`Delete the request from ${request.studentName} for “${request.serviceName}”? This cannot be undone.`);
-    if (!confirmed) return;
     setBusyRequestId(request.id);
     setActionError('');
     setActionMessage('');
@@ -229,6 +250,7 @@ export default function RequestsPage() {
       setActionError(formatDatabaseError(error));
     } finally {
       setBusyRequestId('');
+      setDeleteCandidate(null);
     }
   }
 
@@ -299,7 +321,7 @@ export default function RequestsPage() {
                   <div className="request-queue__service"><p className="eyebrow">{request.status === 'Pending' ? 'Needs review' : 'Student request'}</p><h3>{request.serviceName}</h3><span>ID {request.id.slice(0, 10)}</span></div>
                   <div className="request-queue__date"><span>Submitted</span><strong>{formatDate(request.createdAt)}</strong><small>Request date {formatDate(request.requestDate)}</small></div>
                   <div className="request-queue__status"><StatusBadge status={request.status} /><label className="visually-hidden" htmlFor={`status-${request.id}`}>Status for request from {request.studentName}</label><select id={`status-${request.id}`} className="status-select" value={request.status ?? 'Pending'} disabled={busyRequestId === request.id} onChange={(event) => handleStatusChange(request.id, event.target.value)}>{REQUEST_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></div>
-                  <div className="request-queue__actions"><button className="icon-button" type="button" onClick={() => setActiveRequest(request)} aria-label={`View request from ${request.studentName}`}><Eye size={17} /></button><button className="icon-button icon-button--danger" type="button" disabled={busyRequestId === request.id} onClick={() => handleDelete(request)} aria-label={`Delete request from ${request.studentName}`}><Trash2 size={16} /></button></div>
+                  <div className="request-queue__actions"><button className="icon-button" type="button" onClick={() => setActiveRequest(request)} aria-label={`View request from ${request.studentName}`}><Eye size={17} /></button><button className="icon-button icon-button--danger" type="button" disabled={busyRequestId === request.id} onClick={() => setDeleteCandidate(request)} aria-label={`Delete request from ${request.studentName}`}><Trash2 size={16} /></button></div>
                 </article>
               ))}
             </div>
@@ -309,6 +331,7 @@ export default function RequestsPage() {
       )}
 
       {activeRequest && <RequestDetailsDialog request={activeRequest} onClose={() => setActiveRequest(null)} />}
+      {deleteCandidate && <DeleteRequestDialog request={deleteCandidate} onCancel={() => setDeleteCandidate(null)} onConfirm={() => handleDelete(deleteCandidate)} isDeleting={busyRequestId === deleteCandidate.id} />}
     </section>
   );
 }
