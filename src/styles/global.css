@@ -1151,3 +1151,11 @@ h1, h2, h3, h4,
 .request-aside h2 em,
 .confirmation-card h1 em,
 .not-found-page h1 em { color: #66D9FF !important; }
+
+/* Lighter blue hierarchy for services */
+.hero-copy .eyebrow::before { display: none; }
+.page-heading h1 em { color: #8DE4FF !important; }
+.service-card h3,
+.service-card__link { color: #8DE4FF !important; }
+
+.hero-section--image .hero-copy .eyebrow::before { display: none !important; }
