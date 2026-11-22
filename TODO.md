@@ -64,3 +64,7 @@
 - Add 20 Students from different faculties (FICT, FCMB, FBMG, FCTH).
 - Randomise Student numbers so the first 5 numbers of each student number are `90101` and the last 4 numbers are randomised; display the records in the Lecturer and Admin dashboards and identify each faculty clearly.
 - Include search/filterable directory views and faculty summary counts so the seeded records are useful in the dashboards rather than hidden fixture data.
+
+## 9. Reference-inspired academic workspace presentation — In progress
+- Use the supplied dashboard and login pictures as inspiration for a full-height dark academic workspace, persistent role-specific sidebar, compact top utility bar, four-tone metric cards, quick actions, and a campus-image split login composition.
+- Preserve Limkokwing branding, the existing six-service content, accessible responsive behavior, and the browser-local demo-auth disclosure rather than copying the reference product identity or claiming production security.

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import DashboardLayout from './layouts/DashboardLayout.jsx';
 import SiteLayout from './layouts/SiteLayout.jsx';
 
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
@@ -35,10 +36,12 @@ export default function App() {
           <Route path="confirmation" element={<RouteContent><ConfirmationPage /></RouteContent>} />
           <Route path="requests" element={<RouteContent><RequestsPage /></RouteContent>} />
           <Route path="login" element={<RouteContent><LoginPage /></RouteContent>} />
+          <Route path="*" element={<RouteContent><NotFoundPage /></RouteContent>} />
+        </Route>
+        <Route element={<DashboardLayout />}>
           <Route path="dashboard/student" element={<RouteContent><ProtectedRoute role="student"><StudentDashboardPage /></ProtectedRoute></RouteContent>} />
           <Route path="dashboard/lecturer" element={<RouteContent><ProtectedRoute role="lecturer"><LecturerDashboardPage /></ProtectedRoute></RouteContent>} />
           <Route path="dashboard/admin" element={<RouteContent><ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute></RouteContent>} />
-          <Route path="*" element={<RouteContent><NotFoundPage /></RouteContent>} />
         </Route>
       </Routes>
     </BrowserRouter>

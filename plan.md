@@ -63,6 +63,8 @@ The extension keeps the current dark forest/navy command-centre aesthetic with c
 - **Interaction philosophy:** filters update in place, dashboard cards are keyboard reachable, and every protected route offers a clear path back to the role home or sign-out.
 - **Typography and voice:** preserve the existing serif display headings and sans-serif interface text; copy should be direct and operational, for example “Choose your access point” and “Your student record, in one place.”
 
+The supplied EduManage references refine this direction for the implementation: use a full-height dark academic workspace with a persistent left rail, compact search-and-account utility bar, four-tone metric cards, and clear role-specific quick actions. The campus login reference informs a split login composition with a photographic campus panel and a bright, focused credential card; the reference imagery is used as visual inspiration only, while the portal continues using its existing Limkokwing campus asset and branding.
+
 ## Updated project structure
 
 ```text

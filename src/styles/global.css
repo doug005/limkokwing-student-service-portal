@@ -1495,3 +1495,93 @@ h1, h2, h3, h4,
   .admin-directory-row .directory-status { grid-column: 2 / -1; width: fit-content; }
   .dashboard-note { align-items: flex-start; line-height: 1.5; }
 }
+
+/* EduManage-inspired academic workspace shell: persistent navigation, compact utility bar, and four-tone data accents */
+.dashboard-app-shell { display: flex; min-height: 100vh; background: #080E16; color: #D1DCE8; }
+.dashboard-sidebar { position: fixed; z-index: 50; inset: 0 auto 0 0; display: flex; width: 252px; flex-direction: column; padding: 21px 14px 17px; border-right: 1px solid #283543; background: linear-gradient(180deg, #0B1420 0%, #0A111C 100%); }
+.dashboard-sidebar__brand { display: flex; min-height: 52px; align-items: center; padding: 0 8px 16px; border-bottom: 1px solid #283543; }
+.dashboard-sidebar__brand .brand-lockup { width: 100%; }
+.dashboard-sidebar__brand .brand-logo { width: 42px; height: 42px; object-fit: contain; }
+.dashboard-sidebar__brand .brand-lockup__text strong { color: #F7FAFC; font-size: 14px; }
+.dashboard-sidebar__brand .brand-lockup__text small { color: #8093A7; font-size: 7px; }
+.dashboard-sidebar__identity { display: flex; align-items: center; gap: 10px; margin: 19px 7px 21px; }
+.dashboard-sidebar__avatar { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid #38546B; border-radius: 50%; background: #172535; color: #8DE4FF; font-size: 9px; font-weight: 700; }
+.dashboard-app-shell--lecturer .dashboard-sidebar__avatar { border-color: #4F5E88; background: #25203C; color: #B7C7FF; }
+.dashboard-app-shell--admin .dashboard-sidebar__avatar { border-color: #6A5A3A; background: #2A2117; color: #F3CE78; }
+.dashboard-sidebar__identity strong, .dashboard-sidebar__identity small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashboard-sidebar__identity strong { color: #F7FAFC; font-size: 10px; }
+.dashboard-sidebar__identity small { margin-top: 3px; color: #8093A7; font-size: 8px; }
+.dashboard-sidebar__label { margin: 0 11px 8px; color: #738397; font-size: 8px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.dashboard-sidebar__nav { display: grid; gap: 4px; }
+.dashboard-sidebar__link { display: flex; align-items: center; gap: 12px; min-height: 39px; padding: 0 12px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #AFC0D0; cursor: pointer; font-size: 10px; text-align: left; transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease; }
+.dashboard-sidebar__link svg { flex: 0 0 auto; color: #8093A7; }
+.dashboard-sidebar__link:hover { border-color: #38546B; background: #151F2B; color: #F7FAFC; transform: translateX(2px); }
+.dashboard-sidebar__link:hover svg { color: #8DE4FF; }
+.dashboard-sidebar__link.is-active { border-color: #2B83EA; background: linear-gradient(90deg, #1268D5, #1D77E7); color: #FFFFFF; box-shadow: 0 8px 20px rgba(18,104,213,.22); }
+.dashboard-sidebar__link.is-active svg { color: #FFFFFF; }
+.dashboard-app-shell--lecturer .dashboard-sidebar__link.is-active { border-color: #8D54E8; background: linear-gradient(90deg, #7131D2, #8B45E4); box-shadow: 0 8px 20px rgba(113,49,210,.23); }
+.dashboard-app-shell--admin .dashboard-sidebar__link.is-active { border-color: #BD8C2D; background: linear-gradient(90deg, #936319, #B77C1C); box-shadow: 0 8px 20px rgba(147,99,25,.2); }
+.dashboard-sidebar__divider { height: 1px; margin: 21px 11px 19px; background: #283543; }
+.dashboard-sidebar__logout { width: 100%; border: 0; }
+.dashboard-sidebar__logout:hover { color: #FF9C9C; }
+.dashboard-sidebar__logout:hover svg { color: #FF9C9C; }
+.dashboard-sidebar__footer { display: flex; align-items: center; gap: 9px; margin-top: auto; padding: 16px 8px 0; border-top: 1px solid #283543; }
+.dashboard-sidebar__footer-mark { display: inline-flex; width: 29px; height: 29px; align-items: center; justify-content: center; border: 1px solid #38546B; border-radius: 8px; color: #8DE4FF; }
+.dashboard-sidebar__footer strong, .dashboard-sidebar__footer small { display: block; }
+.dashboard-sidebar__footer strong { color: #D1DCE8; font-size: 9px; }
+.dashboard-sidebar__footer small { margin-top: 2px; color: #738397; font-size: 7px; }
+.dashboard-sidebar__scrim { display: none; }
+.dashboard-main { width: calc(100% - 252px); min-width: 0; margin-left: 252px; }
+.dashboard-topbar { position: sticky; z-index: 30; top: 0; display: flex; min-height: 72px; align-items: center; gap: 22px; padding: 0 29px; border-bottom: 1px solid #283543; background: rgba(8,14,22,.92); backdrop-filter: blur(15px); }
+.dashboard-menu-toggle { display: none; width: 37px; height: 37px; align-items: center; justify-content: center; border: 1px solid #38546B; border-radius: 8px; background: #151F2B; color: #D1DCE8; cursor: pointer; }
+.dashboard-topbar__search { display: flex; width: min(470px, 50%); height: 38px; align-items: center; gap: 9px; padding: 0 11px; border: 1px solid #38546B; border-radius: 8px; background: #101B27; color: #8EA3B8; }
+.dashboard-topbar__search:focus-within { border-color: #66D9FF; box-shadow: 0 0 0 3px rgba(102,217,255,.1); }
+.dashboard-topbar__search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #F7FAFC; font-size: 9px; }
+.dashboard-topbar__search input::placeholder { color: #738397; }
+.dashboard-topbar__search kbd { padding: 3px 5px; border: 1px solid #38546B; border-radius: 4px; color: #8093A7; font-family: inherit; font-size: 7px; white-space: nowrap; }
+.dashboard-topbar__account { display: flex; align-items: center; gap: 11px; margin-left: auto; }
+.dashboard-topbar__notification { display: inline-flex; width: 26px; height: 26px; align-items: center; justify-content: center; border: 1px solid #38546B; border-radius: 50%; color: #F3CE78; font-size: 20px; line-height: 0; }
+.dashboard-topbar__account-copy { max-width: 180px; }
+.dashboard-topbar__account-copy strong, .dashboard-topbar__account-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashboard-topbar__account-copy strong { color: #F7FAFC; font-size: 9px; }
+.dashboard-topbar__account-copy small { margin-top: 2px; color: #8093A7; font-size: 7px; }
+.dashboard-topbar__signout { padding: 0; border: 0; background: transparent; color: #8093A7; cursor: pointer; font-size: 8px; }
+.dashboard-topbar__signout:hover { color: #FF9C9C; }
+.dashboard-main__content { min-height: calc(100vh - 72px); background: radial-gradient(circle at 76% 0%, rgba(30,92,165,.08), transparent 29%), #080E16; }
+.dashboard-main__content .dashboard-page { width: min(100%, 1240px); margin: 0 auto; padding-top: 38px; padding-bottom: 70px; }
+.dashboard-main__content .dashboard-page .page-heading h1 { font-size: clamp(38px, 4.2vw, 60px); }
+.dashboard-main__content .dashboard-page .page-heading__description { max-width: 650px; }
+.dashboard-main__content .dashboard-metric:nth-child(2) { background: linear-gradient(145deg, rgba(113,49,210,.2), rgba(21,31,43,1)); }
+.dashboard-main__content .dashboard-metric:nth-child(3) { background: linear-gradient(145deg, rgba(12,126,84,.18), rgba(21,31,43,1)); }
+.dashboard-main__content .dashboard-metric:nth-child(4) { background: linear-gradient(145deg, rgba(147,99,25,.18), rgba(21,31,43,1)); }
+.dashboard-main__content .dashboard-metric:nth-child(2) strong { color: #B7C7FF; }
+.dashboard-main__content .dashboard-metric:nth-child(3) strong { color: #7DE3EA; }
+.dashboard-main__content .dashboard-metric:nth-child(4) strong { color: #F3CE78; }
+.dashboard-main__content .login-page { padding-top: 38px; }
+.role-picker { background: linear-gradient(145deg, rgba(7,18,28,.9), rgba(11,20,32,.92)), url('../../public/images/limkokwing-campus-hero.jpg') center / cover; }
+.role-picker__intro h2 { text-shadow: 0 2px 22px rgba(0,0,0,.35); }
+@media (max-width: 980px) {
+  .dashboard-sidebar { width: 220px; }
+  .dashboard-main { width: calc(100% - 220px); margin-left: 220px; }
+  .dashboard-topbar { padding-inline: 20px; }
+  .dashboard-topbar__account-copy { max-width: 125px; }
+}
+@media (max-width: 760px) {
+  .dashboard-sidebar { transform: translateX(-102%); width: min(292px, 86vw); transition: transform .22s ease; box-shadow: 18px 0 45px rgba(0,0,0,.45); }
+  .dashboard-sidebar--open { transform: translateX(0); }
+  .dashboard-sidebar__scrim { position: fixed; z-index: 40; inset: 0; display: block; border: 0; background: rgba(2,7,13,.7); }
+  .dashboard-main { width: 100%; margin-left: 0; }
+  .dashboard-topbar { min-height: 66px; gap: 12px; padding-inline: 15px; }
+  .dashboard-menu-toggle { display: inline-flex; flex: 0 0 auto; }
+  .dashboard-topbar__search { width: auto; flex: 1; }
+  .dashboard-topbar__search kbd { display: none; }
+  .dashboard-topbar__notification, .dashboard-topbar__account-copy, .dashboard-topbar .role-badge { display: none; }
+  .dashboard-topbar__account { margin-left: 0; }
+  .dashboard-topbar__signout { font-size: 9px; }
+  .dashboard-main__content .dashboard-page { padding-top: 31px; }
+}
+@media (max-width: 520px) {
+  .dashboard-main__content .dashboard-page { padding-top: 25px; }
+  .dashboard-main__content .dashboard-page .page-heading h1 { font-size: 40px; }
+  .dashboard-topbar__search input { font-size: 8px; }
+}
