@@ -54,3 +54,13 @@
 - Deliver complete React source code, required components and pages, router configuration, Firebase integration, Firestore CRUD, responsive CSS, `.env.example`, Firestore security rules, README, and clear setup/execution instructions.
 - Prioritise the university assignment over unnecessary features; keep the implementation organised and understandable for lecturer assessment.
 - Evidence: production build succeeds; `npm audit` reports zero vulnerabilities; application and exact route manifest return HTTP 200 on configured port 3000; desktop/mobile screenshots and field-validation checks pass. Firebase connection, Firestore CRUD, and staff sign-in remain unverified until project settings are configured.
+
+## 7. Role-based login and protected dashboards — In progress
+- Add role based logins with a student dashboard, lecturer dashboard and an admin dashboard.
+- Provide a `/login` flow for the Student, Lecturer, and Admin roles, persist the active demo session across refreshes, sign out cleanly, and prevent unauthenticated users from opening protected dashboards or users from opening a dashboard for a different role.
+- Keep the existing Firebase-backed `/requests` request-management workflow available and link the Admin dashboard to it; do not present the local demo session as production-grade authentication.
+
+## 8. Twenty seeded students across faculties — In progress
+- Add 20 Students from different faculties (FICT, FCMB, FBMG, FCTH).
+- Randomise Student numbers so the first 5 numbers of each student number are `90101` and the last 4 numbers are randomised; display the records in the Lecturer and Admin dashboards and identify each faculty clearly.
+- Include search/filterable directory views and faculty summary counts so the seeded records are useful in the dashboards rather than hidden fixture data.

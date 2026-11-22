@@ -13,6 +13,8 @@ The frontend is React, built with webpack and served by a Node.js/Express applic
 - Confirmation page with the real saved request reference and details after a successful Firestore write.
 - Firestore create/read/update/delete operations for `studentRequests`.
 - Staff request management with live updates, status counts, search, details, status changes, and confirmed deletion.
+- Role-based demo login with Student, Lecturer, and Administrator dashboards.
+- Twenty seeded students distributed across FICT, FCMB, FBMG, and FCTH; every student number begins with `90101` and ends with four randomised digits.
 - Responsive navigation, accessible field errors, and loading, empty, and failure states.
 - Firestore rules that allow validated student request creation while restricting reads, updates, and deletes to approved staff.
 - Node.js health endpoint at `/health`; Express serves the SPA and its browser-side routes.
@@ -30,11 +32,11 @@ JavaScript, Node.js 20+, React 18, React Router DOM, Express 5, webpack, Firebas
 │   ├── build.mjs             # Bundles React/CSS with webpack and copies public assets
 │   └── dev.mjs               # Watches client source and starts Node.js server
 ├── src/
-│   ├── components/           # Shared buttons, cards, fields, status, navigation, footer
-│   ├── data/                 # Six student service objects
+│   ├── components/           # Shared buttons, cards, fields, status, navigation, footer, route guards
+│   ├── data/                 # Six services and 20 seeded student records
 │   ├── layouts/              # Shared routed shell
-│   ├── pages/                # Home, services, details, request, confirmation, management
-│   ├── services/             # Firebase setup and Firestore/Auth operations
+│   ├── pages/                # Public pages, login, role dashboards, request management
+│   ├── services/             # Firebase setup, Firestore operations, and demo role sessions
 │   ├── styles/               # Responsive design tokens and application CSS
 │   ├── utils/                # Date formatting helpers
 │   ├── App.jsx                # React Router route tree
@@ -110,6 +112,20 @@ The Vercel configuration rewrites client-side routes such as `/services` and `/r
 Firebase Web SDK settings are browser configuration values, not authorization. The Firestore rules protect student data. Do not place Firebase Admin SDK service-account keys in `.env.local` or the browser bundle; this app does not use those private credentials.
 
 The included `firestore.rules` allow unsigned students to create requests matching the expected schema and canonical service name. They do not allow the public to list/read requests, change statuses, or delete documents.
+
+## Role-based demo login
+
+The new role dashboards are available from `/login`. They use a browser-local demo session so the role experience works on the existing static Vercel deployment without requiring Firebase credentials. Use the following seeded accounts:
+
+| Role | Username | Password | Destination |
+| --- | --- | --- | --- |
+| Student | `901014827` | `student123` | `/dashboard/student` |
+| Lecturer | `lecturer@limkokwing.ac.ls` | `lecturer123` | `/dashboard/lecturer` |
+| Administrator | `admin@limkokwing.ac.ls` | `admin123` | `/dashboard/admin` |
+
+Any seeded student number can be used with `student123` to preview that student's record. The browser-local session is intentionally a presentation/demo mechanism and is not a production security boundary. Before handling real credentials or student data, replace `src/services/roleAuth.js` with Firebase Authentication, enforce roles with server-side claims or Firestore rules, and remove the demo passwords from the client bundle.
+
+The student request form uses the same required number format as the seeded directory: the first five digits are `90101`, followed by four digits. For example, the first demo student is `901014827`.
 
 ### Authorise staff request managers
 

@@ -26,7 +26,7 @@ service cloud.firestore {
         && data.studentName.size() <= 35
         && !data.studentName.matches('.*[0-9].*')
         && data.studentId is string
-        && data.studentId.matches('^9010[0-9]{5}$')
+        && data.studentId.matches('^90101[0-9]{4}$')
         && data.email is string
         && data.email.size() >= 3
         && data.email.size() <= 254

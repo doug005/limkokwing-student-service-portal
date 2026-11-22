@@ -28,8 +28,8 @@ function validateForm(form) {
   else if (studentName.length < 3) errors.studentName = 'Your name must be at least 3 characters.';
   else if (studentName.length > 35) errors.studentName = 'Your name cannot exceed 35 characters.';
   else if (/\p{N}/u.test(studentName)) errors.studentName = 'Your name cannot contain numbers.';
-  if (!/^\d{5}$/.test(studentId)) errors.studentId = 'Enter the remaining numbers after 9010';
-  if (!form.email.trim()) errors.email = 'Enter the your email address.';
+  if (!/^\d{4}$/.test(studentId)) errors.studentId = 'Enter the remaining four digits after 90101.';
+  if (!form.email.trim()) errors.email = 'Enter your email address.';
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Enter a valid email address.';
   else if (email.length > 254) errors.email = 'Keep your email address to 254 characters or fewer.';
   if (!getServiceById(form.serviceId)) errors.serviceId = 'Choose the service you need.';
@@ -69,7 +69,7 @@ export default function RequestPage() {
     const { name, value } = event.target;
     const containsNumbers = name === 'studentName' && /\p{N}/u.test(value);
     const nextValue = name === 'studentId'
-      ? value.replace(/\D/g, '').slice(0, 5)
+      ? value.replace(/\D/g, '').slice(0, 4)
       : name === 'studentName'
         ? value.replace(/\p{N}/gu, '')
         : value;
@@ -90,7 +90,7 @@ export default function RequestPage() {
     const normalizedValue = name === 'studentName'
       ? value.replace(/\p{N}/gu, '')
       : name === 'studentId'
-        ? value.replace(/\D/g, '').slice(0, 5)
+        ? value.replace(/\D/g, '').slice(0, 4)
         : value;
     const fieldErrors = validateForm({ ...form, [name]: normalizedValue });
     setErrors((current) => ({ ...current, [name]: fieldErrors[name] }));
@@ -112,7 +112,7 @@ export default function RequestPage() {
       const savedRequest = await createStudentRequest({
         ...form,
         studentName: form.studentName.trim(),
-        studentId: `9010${form.studentId}`,
+        studentId: `90101${form.studentId}`,
         email: form.email.trim(),
         description: form.description.trim(),
         serviceName: selectedService.name,
@@ -151,11 +151,11 @@ export default function RequestPage() {
             <FormField id="studentName" label="Full name" error={errors.studentName} required>
               {({ describedBy, invalid }) => <input id="studentName" name="studentName" type="text" minLength={3} maxLength={35} autoComplete="name" placeholder="e.g. Refiloe Mokoena" value={form.studentName} onChange={updateField} onBlur={validateFieldOnBlur} aria-invalid={invalid} aria-describedby={describedBy} />}
             </FormField>
-            <FormField id="studentId" label="Student ID" error={errors.studentId} hint="9010 is fixed. Enter all 5 remaining digits to complete your 9-digit student number." required>
+            <FormField id="studentId" label="Student ID" error={errors.studentId} hint="90101 is fixed. Enter the 4 remaining digits to complete your 9-digit student number." required>
               {({ describedBy, invalid }) => (
                 <div className="student-id-input">
-                  <span className="student-id-input__prefix" aria-hidden="true">9010</span>
-                  <input id="studentId" name="studentId" type="text" inputMode="numeric" pattern="[0-9]{5}" maxLength={20} autoComplete="off" placeholder="12345" value={form.studentId} onChange={updateField} onBlur={validateFieldOnBlur} aria-label="Last 5 digits of student ID" aria-invalid={invalid} aria-describedby={describedBy} />
+                  <span className="student-id-input__prefix" aria-hidden="true">90101</span>
+                  <input id="studentId" name="studentId" type="text" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} autoComplete="off" placeholder="4827" value={form.studentId} onChange={updateField} onBlur={validateFieldOnBlur} aria-label="Last 4 digits of student ID" aria-invalid={invalid} aria-describedby={describedBy} />
                 </div>
               )}
             </FormField>

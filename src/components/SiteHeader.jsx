@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import BrandMark from './BrandMark.jsx';
+import RoleBadge from './RoleBadge.jsx';
+import { getDashboardPath, signOutDemo, useRoleSession } from '../services/roleAuth.js';
 
 const navItems = [
   { label: 'Home', to: '/' },
@@ -12,8 +14,15 @@ const navItems = [
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const session = useRoleSession();
 
   useEffect(() => setMenuOpen(false), [location.pathname]);
+
+  function handleSignOut() {
+    signOutDemo();
+    navigate('/login');
+  }
 
   return (
     <header className="site-header">
@@ -41,9 +50,19 @@ export default function SiteHeader() {
               {item.label}
             </NavLink>
           ))}
+          {session ? (
+            <NavLink to={getDashboardPath(session.role)} className={({ isActive }) => `main-nav__link${isActive ? ' is-active' : ''}`}>
+              Dashboard
+            </NavLink>
+          ) : (
+            <NavLink to="/login" className={({ isActive }) => `main-nav__link${isActive ? ' is-active' : ''}`}>
+              Portal login
+            </NavLink>
+          )}
           <Link className="header-cta" to="/request">
             New request <ArrowUpRight size={15} />
           </Link>
+          {session && <span className="header-session"><RoleBadge role={session.role} compact /><button type="button" className="header-sign-out" onClick={handleSignOut}>Sign out</button></span>}
         </nav>
       </div>
     </header>

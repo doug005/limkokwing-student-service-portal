@@ -5,6 +5,10 @@
     { "path": "/services/:serviceId", "title": "Service details" },
     { "path": "/request", "title": "Submit a request" },
     { "path": "/confirmation", "title": "Request confirmation" },
-    { "path": "/requests", "title": "Request management" }
+    { "path": "/requests", "title": "Request management" },
+    { "path": "/login", "title": "Portal login" },
+    { "path": "/dashboard/student", "title": "Student dashboard" },
+    { "path": "/dashboard/lecturer", "title": "Lecturer dashboard" },
+    { "path": "/dashboard/admin", "title": "Administrator dashboard" }
   ]
 }
