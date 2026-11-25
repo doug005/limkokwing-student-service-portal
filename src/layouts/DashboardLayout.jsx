@@ -14,7 +14,6 @@ const NAVIGATION = {
     { label: 'My Requests', to: '/requests', icon: ClipboardList },
     { label: 'Course Registration', to: '/dashboard/student?view=registration', icon: GraduationCap },
     { label: 'Timetable', to: '/dashboard/student?view=timetable', icon: CalendarDays },
-    { label: 'Attendance', to: '/dashboard/student?view=attendance', icon: ClipboardList },
     { label: 'Results & Grades', to: '/dashboard/student?view=results', icon: BarChart3 },
     { label: 'Assignments', to: '/dashboard/student?view=assignments', icon: BookOpen },
     { label: 'Fees & Payments', to: '/dashboard/student?view=payments', icon: FilePlus2 },
@@ -26,7 +25,6 @@ const NAVIGATION = {
     { label: 'Dashboard', to: '/dashboard/lecturer', icon: LayoutDashboard, end: true },
     { label: 'My Courses', to: '/dashboard/lecturer?view=courses', icon: BookOpen },
     { label: 'Students', to: '/dashboard/lecturer?view=students', icon: UsersRound },
-    { label: 'Attendance', to: '/dashboard/lecturer?view=attendance', icon: CalendarDays },
     { label: 'Assignments', to: '/dashboard/lecturer?view=assignments', icon: FilePlus2 },
     { label: 'Grades & Results', to: '/dashboard/lecturer?view=results', icon: BarChart3 },
     { label: 'Learning Materials', to: '/dashboard/lecturer?view=materials', icon: BookOpen },
@@ -59,6 +57,7 @@ export default function DashboardLayout() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => setMenuOpen(false), [location.pathname, location.search]);
+  useEffect(() => { window.scrollTo(0,0); }, [location.pathname, location.search]);
 
   async function handleSignOut() {
     try { if (isFirebaseConfigured) await signOutRequestManager(); } catch (error) { console.error('Firebase sign-out failed', error); window.alert('Could not sign out of Firebase. Please try again.'); return; }
