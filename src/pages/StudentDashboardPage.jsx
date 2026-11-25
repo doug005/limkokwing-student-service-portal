@@ -56,6 +56,20 @@ export default function StudentDashboardPage() {
   }[view];
 
 
+  if (view) return <section className="reference-dashboard student-reference">
+    <div className="reference-heading"><div><h1>{viewContent?.title || (view === 'registration' ? 'Course Registration' : 'Profile')}</h1><p>{student.programme} · {student.year}, Semester 1</p></div></div>
+    <section className="reference-card" style={{padding:20}}>
+    {['academics','registration'].includes(view) && <><h2>Course registration</h2><WorkspaceTable headers={['Course','Schedule','Venue']} rows={timetable.map(([time,course,room])=>[course,time,room])}/><p>Illustrative curriculum. Confirm your official registration with the registrar.</p><Link className="reference-primary-button" to="/request?service=registration-assistance">Request registration assistance</Link></>}
+    {view === 'timetable' && <><h2>Weekly lecture timetable</h2><WorkspaceTable headers={['Day','Time','Course','Venue']} rows={timetable.map(([time,course,room,day])=>[day,time,course,room])}/><p>Sample timetable · official exam schedule not available.</p></>}
+    {view === 'attendance' && <><h2>Check in to class</h2><p>No verified active attendance session is available.</p><h2>Attendance history</h2><WorkspaceTable headers={['Date','Course','Session','Status']} rows={[]}/></>}
+    {view === 'results' && <><div className="reference-stat-grid">{['Semester GPA','Cumulative GPA','Degree classification','Academic standing'].map(label=><article className="reference-stat" key={label}><span><strong>{label}</strong><b>—</b></span></article>)}</div><h2>Semester results</h2><WorkspaceTable headers={['Course code','Course title','Credit units','CA score','Exam score','Total','Grade','Grade point']} rows={[]}/><h2>GPA history</h2><p>No official grades published.</p><Link className="reference-primary-button" to="/request?service=academic-transcript">Request transcript</Link></>}
+    {view === 'payments' && <><h2>Fee statement</h2><p>Official outstanding balance unavailable.</p><WorkspaceTable headers={['Description','Amount (M)','Status']} rows={[]}/><h2>Payment history</h2><WorkspaceTable headers={['Reference','Date','Amount (M)','Status']} rows={[]}/><Link className="reference-primary-button" to="/request?service=general-enquiry">Contact finance office</Link></>}
+    {view === 'assignments' && <><h2>Course assignments</h2><WorkspaceTable headers={['Course','Assignment','Due date','Status']} rows={[]}/></>}
+    {view === 'notifications' && <p>No notifications available.</p>}
+    {view === 'announcements' && <p>No published announcements available.</p>}
+    {view === 'profile' && <WorkspaceTable headers={['Field','Details']} rows={[[ 'Name',student.name],['Student number',student.studentNumber],['Programme',student.programme],['Faculty',faculty?.name || student.faculty],['Email',student.email]]}/>}
+    </section></section>;
+
   return (
     <section className="reference-dashboard student-reference">
       <div className="reference-heading"><div><h1>Good Morning, {student.name.split(' ')[0]} <span className="wave">👋</span></h1><p>Welcome to your Student Dashboard. Access your academic information, services and requests.</p></div></div>
@@ -65,7 +79,6 @@ export default function StudentDashboardPage() {
         <div className="student-profile-card__summary"><div><Wallet size={25} /><span>Outstanding Fees<strong>M2,450.00</strong></span><Link to="/dashboard/student?view=payments">Make Payment</Link></div><div><CalendarDays size={25} /><span>Current Semester<strong>{student.year}, Semester 1</strong></span><b className="status-pill status-pill--active"><CheckCircle2 size={14} /> Active</b></div></div>
       </section>
 
-      {viewContent && <section className="reference-view-panel reference-card"><div><p className="reference-view-panel__eyebrow">Student workspace</p><h2>{viewContent.title}</h2><p>{viewContent.text}</p></div>{viewContent.action}</section>}
 
       <section className="reference-section"><h2>Quick Actions</h2><div className="reference-action-grid">{quickActions.map(({ label, icon: Icon, to }) => <Link className="reference-action-card" to={to} key={label}><span className="reference-action-card__icon"><Icon size={22} /></span><strong>{label}</strong><ArrowRight size={17} /></Link>)}</div></section>
 
@@ -77,3 +90,5 @@ export default function StudentDashboardPage() {
     </section>
   );
 }
+
+function WorkspaceTable({headers,rows}) {return <div style={{overflowX:'auto',margin:'16px 0'}}><table style={{width:'100%',borderCollapse:'collapse',textAlign:'left',fontSize:14}}><thead style={{background:'#e8eef7'}}><tr>{headers.map(h=><th key={h} style={{padding:12}}>{h}</th>)}</tr></thead><tbody>{rows.length ? rows.map((row,i)=><tr key={i}>{row.map((cell,j)=><td key={j} style={{padding:12,borderBottom:'1px solid #dce3ed'}}>{cell}</td>)}</tr>):<tr><td colSpan={headers.length} style={{padding:24,textAlign:'center'}}>No records available</td></tr>}</tbody></table></div>}
