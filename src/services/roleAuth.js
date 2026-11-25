@@ -52,6 +52,7 @@ export const DEMO_ACCOUNTS = {
   },
 };
 
+export const LECTURERS = ['FICT','FCMB','FBMG','FCTH'].flatMap((faculty)=>Array.from({length:4},(_,i)=>({role:'lecturer',faculty,index:i,identifier:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',email:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',displayName:faculty==='FICT'&&i===0?'Dr. Naledi Ralefala':faculty+' Lecturer '+(i+1),password:'lecturer123'})));
 export function getDashboardPath(role) {
   return `/dashboard/${role}`;
 }
@@ -88,7 +89,7 @@ export function signInDemo({ role, identifier, password }) {
   const normalizedRole = String(role || '').toLowerCase();
   const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
   const suppliedPassword = String(password || '');
-  const account = DEMO_ACCOUNTS[normalizedRole];
+  const account = normalizedRole==='lecturer'?LECTURERS.find(a=>a.identifier===normalizedIdentifier):DEMO_ACCOUNTS[normalizedRole];
 
   if (!account) throw authError('Choose a valid portal role before signing in.');
   if (!normalizedIdentifier || !suppliedPassword) throw authError('Enter your username and password to continue.');
@@ -143,7 +144,7 @@ export function signInWithCredentials({ identifier, password }) {
     });
   }
 
-  const staffAccount = Object.values(DEMO_ACCOUNTS).find((account) => (
+  const staffAccount = [...LECTURERS,DEMO_ACCOUNTS.admin].find((account) => (
     account.role !== 'student'
     && account.identifier.toLowerCase() === normalizedIdentifier
     && account.password === suppliedPassword
