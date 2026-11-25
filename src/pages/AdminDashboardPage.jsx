@@ -1,62 +1,48 @@
-import { useMemo, useState } from 'react';
-import { ArrowRight, ClipboardList, Search, Settings2, ShieldCheck, UsersRound } from 'lucide-react';
-import Button from '../components/Button.jsx';
-import PageHeader from '../components/PageHeader.jsx';
-import RoleBadge from '../components/RoleBadge.jsx';
-import { DEMO_ACCOUNTS, ROLE_DEFINITIONS, useRoleSession } from '../services/roleAuth.js';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowRight, BarChart3, BookOpen, CalendarDays, CheckCircle2, ClipboardList, GraduationCap, Layers3, Search, Settings2, ShieldCheck, UserPlus, UsersRound, Wallet } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { FACULTIES, students } from '../data/students.js';
 
-const roleOrder = ['student', 'lecturer', 'admin'];
+const activity = [
+  ['10:42 AM', 'Admin', 'Approved Service Request', 'REQ-1049 – Academic Transcript', CheckCircle2],
+  ['10:15 AM', 'Registrar', 'Updated Timetable', 'DIWP3110 – Web Design II (Tue 11:00)', CalendarDays],
+  ['09:48 AM', 'Finance Officer', 'Recorded Fee Payment', 'STD231045 – M5,000', Wallet],
+  ['09:20 AM', 'Admin', 'Added User', 'Staff – Dr. T. Naledi (Lecturer)', UserPlus],
+  ['08:57 AM', 'System', 'Role Updated', 'User – L. Mokoena → Lecturer', ShieldCheck],
+];
+
+const quickActions = [
+  ['Add Student', UserPlus, '/dashboard/admin?view=students'], ['Add Staff', UsersRound, '/dashboard/admin?view=staff'], ['Create Course', Layers3, '/dashboard/admin?view=academics'], ['Create Timetable', CalendarDays, '/services?search=calendar'], ['Review Approvals', CheckCircle2, '/requests'], ['Generate Report', BarChart3, '#generate-report'],
+];
 
 export default function AdminDashboardPage() {
-  const session = useRoleSession();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
+  useEffect(() => setSearchTerm(searchParams.get('search') || ''), [searchParams]);
   const search = searchTerm.trim().toLowerCase();
   const facultyCounts = useMemo(() => FACULTIES.map((faculty) => ({ ...faculty, count: students.filter((student) => student.faculty === faculty.code).length })), []);
   const filteredStudents = useMemo(() => students.filter((student) => [student.name, student.studentNumber, student.email, student.faculty, student.programme].some((value) => value.toLowerCase().includes(search))), [search]);
 
+  function generateReport(event) {
+    event.preventDefault();
+    const csv = ['Student number,Name,Faculty,Programme,Year,Status', ...students.map((student) => [student.studentNumber, student.name, student.faculty, student.programme, student.year, student.status].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))].join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'limkokwing-student-directory.csv'; anchor.click(); URL.revokeObjectURL(url);
+  }
+
   return (
-    <section className="shell page-section dashboard-page admin-dashboard">
-      <PageHeader
-        eyebrow="Administrator dashboard"
-        title={<>Keep the portal<br /><em>in good order.</em></>}
-        description="Monitor role access, confirm faculty coverage, and move from the seeded directory into the live request-management workspace."
-        action={<RoleBadge role="admin" />}
-      />
+    <section className="reference-dashboard admin-reference">
+      <div className="reference-heading reference-heading--with-date"><div><h1>Welcome, Administrator</h1><p>Manage university services, users, academic data and system operations.</p></div><span className="reference-date"><CalendarDays size={17} /> Tue, 25 Nov 2026</span></div>
+      <div className="reference-stat-grid"><Stat icon={GraduationCap} label="Total Students" value="4,286" tone="teal" /><Stat icon={UsersRound} label="Total Staff" value="318" tone="blue" /><Stat icon={CheckCircle2} label="Pending Approvals" value="27" tone="gold" /><Stat icon={Wallet} label="Fee Collections" value="M1,248,500" tone="green" /></div>
 
-      <div className="dashboard-hero dashboard-hero--admin">
-        <div><span className="dashboard-hero__kicker"><span className="dashboard-live-dot" /> Control centre</span><h2>Welcome back, <em>administrator.</em></h2><p>{session?.email} has full demo access across the student portal.</p></div>
-        <Button to="/requests" variant="light">Open request management <ArrowRight size={15} /></Button>
-      </div>
+      <section className="reference-section admin-quick-section"><h2>Quick Actions</h2><div className="admin-quick-grid">{quickActions.map(([label, Icon, to]) => label === 'Generate Report' ? <a className="admin-quick-card" href={to} onClick={generateReport} key={label}><Icon size={27} /><strong>{label}</strong></a> : <Link className="admin-quick-card" to={to} key={label}><Icon size={27} /><strong>{label}</strong></Link>)}</div></section>
 
-      <div className="dashboard-metric-grid">
-        <article className="dashboard-metric dashboard-metric--accent"><span>Student records</span><strong>{students.length}</strong><small>Ready in the directory</small></article>
-        <article className="dashboard-metric"><span>Faculties represented</span><strong>{FACULTIES.length}</strong><small>FICT · FCMB · FBMG · FCTH</small></article>
-        <article className="dashboard-metric"><span>Role workspaces</span><strong>{roleOrder.length}</strong><small>Student, lecturer, administrator</small></article>
-        <article className="dashboard-metric"><span>Directory coverage</span><strong>100%</strong><small>All seeded records mapped</small></article>
-      </div>
+      <div className="admin-lower-grid"><section className="reference-card activity-card"><div className="reference-card__heading"><h2>Recent Activity</h2><Link to="/requests">View All Activity <ArrowRight size={15} /></Link></div><div className="activity-table"><div className="activity-table__head"><span>Time</span><span>User</span><span>Activity</span><span>Details</span></div>{activity.map(([time, user, action, detail, Icon]) => <div className="activity-table__row" key={`${time}-${action}`}><span>{time}</span><span><UsersRound size={15} /> <strong>{user}</strong></span><span><Icon size={15} /> {action}</span><span>{detail}</span></div>)}</div></section><section className="reference-card system-overview"><div className="reference-card__heading"><h2>System Overview</h2></div><div className="system-list"><div><Layers3 size={18} /><span>Active Services</span><b>6</b></div><div><BookOpen size={18} /><span>Active Courses</span><b>42</b></div><div><CalendarDays size={18} /><span>Timetables</span><b>12</b></div><div><ClipboardList size={18} /><span>Open Requests</span><b>63</b></div><div><BarChart3 size={18} /><span>System Status</span><b className="system-status"><CheckCircle2 size={13} /> Operational</b></div></div></section></div>
 
-      <div className="admin-dashboard-grid">
-        <section className="dashboard-panel">
-          <div className="dashboard-panel__heading"><div><p className="eyebrow">Access map</p><h2>Role <em>workspaces.</em></h2></div><Settings2 size={20} aria-hidden="true" /></div>
-          <div className="role-access-list">{roleOrder.map((role) => <div className="role-access-row" key={role}><RoleBadge role={role} compact /><span><strong>{ROLE_DEFINITIONS[role].label}</strong><small>{ROLE_DEFINITIONS[role].description}</small></span><span className="access-state">Enabled</span></div>)}</div>
-          <div className="dashboard-panel__callout"><ShieldCheck size={16} /><span>Demo roles are browser-local. Connect Firebase Authentication and server-side claims before production use.</span></div>
-        </section>
-
-        <section className="dashboard-panel dashboard-panel--soft">
-          <div className="dashboard-panel__heading"><div><p className="eyebrow">Faculty mix</p><h2>Coverage by <em>faculty.</em></h2></div><UsersRound size={20} aria-hidden="true" /></div>
-          <div className="admin-faculty-list">{facultyCounts.map((faculty) => <div className="admin-faculty-row" key={faculty.code}><div><strong>{faculty.code}</strong><span>{faculty.name}</span></div><div className="admin-faculty-count"><b>{faculty.count}</b><small>students</small></div></div>)}</div>
-        </section>
-      </div>
-
-      <section className="directory-section admin-directory-section">
-        <div className="directory-heading"><div><p className="eyebrow">Admin directory <span className="eyebrow-count">{filteredStudents.length}</span></p><h2>Search every <em>record.</em></h2></div><label className="search-control directory-search"><Search size={15} aria-hidden="true" /><span className="visually-hidden">Search student records</span><input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search student, faculty, programme…" /></label></div>
-        <div className="admin-directory-list">{filteredStudents.map((student) => <article className="admin-directory-row" key={student.id}><span className="admin-directory-row__initials">{student.name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span><div><strong>{student.name}</strong><small>{student.studentNumber} · {student.email}</small></div><span className="faculty-code">{student.faculty}</span><span className="admin-directory-row__programme">{student.programme}</span><span className="directory-status">{student.status}</span></article>)}</div>
-        {filteredStudents.length === 0 && <div className="directory-empty"><UsersRound size={18} /><p>No student records match that search.</p></div>}
-      </section>
-
-      <div className="admin-action-strip"><div><p className="eyebrow">Next operational step</p><h2>Review the live service <em>queue.</em></h2><p>Firebase-backed requests stay in the existing protected request-management page.</p></div><Button to="/requests" variant="outline"><ClipboardList size={15} /> Open request management <ArrowRight size={15} /></Button></div>
-      <p className="dashboard-note"><ShieldCheck size={17} /><span>The three demo account hints are <strong>{DEMO_ACCOUNTS.student.hint}</strong>, <strong>{DEMO_ACCOUNTS.lecturer.hint}</strong>, and <strong>{DEMO_ACCOUNTS.admin.hint}</strong>.</span></p>
+      <section className="reference-card admin-directory-card"><div className="reference-card__heading"><div><h2>Student Directory</h2><small>{filteredStudents.length} seeded records across {FACULTIES.length} faculties</small></div><label className="reference-search"><Search size={16} /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search students, staff, requests…" aria-label="Search student directory" /></label></div><div className="admin-directory-table">{filteredStudents.slice(0, 8).map((student) => <div key={student.id}><span className="directory-initials">{student.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><strong>{student.name}<small>{student.studentNumber} · {student.programme}</small></strong><b>{student.faculty}</b><span>{student.status}</span></div>)}</div></section>
+      <p className="reference-footnote"><ShieldCheck size={15} /> Faculty coverage: {facultyCounts.map((faculty) => `${faculty.code} (${faculty.count})`).join(' · ')}.</p>
     </section>
   );
 }
+
+function Stat({ icon: Icon, label, value, tone }) { return <article className={`reference-stat reference-stat--${tone}`}><span className="reference-stat__icon"><Icon size={25} /></span><span><strong>{label}</strong><b>{value}</b></span></article>; }
