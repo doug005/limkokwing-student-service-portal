@@ -1,12 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
-import SiteLayout from './layouts/SiteLayout.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import { getDashboardPath, useRoleSession } from './services/roleAuth.js';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
-const HomePage = lazy(() => import('./pages/HomePage.jsx'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage.jsx'));
 const ServiceDetailsPage = lazy(() => import('./pages/ServiceDetailsPage.jsx'));
 const RequestPage = lazy(() => import('./pages/RequestPage.jsx'));
@@ -28,8 +26,8 @@ function RouteContent({ children }) {
 function AuthenticatedRoutes({ session }) {
   return (
     <Routes>
-      <Route element={<SiteLayout />}>
-        <Route index element={<RouteContent><HomePage /></RouteContent>} />
+      <Route element={<DashboardLayout />}>
+        <Route index element={<Navigate to={getDashboardPath(session.role)} replace />} />
         <Route path="services" element={<RouteContent><ServicesPage /></RouteContent>} />
         <Route path="services/:serviceId" element={<RouteContent><ServiceDetailsPage /></RouteContent>} />
         <Route path="request" element={<RouteContent><RequestPage /></RouteContent>} />
@@ -37,8 +35,6 @@ function AuthenticatedRoutes({ session }) {
         <Route path="requests" element={<RouteContent><RequestsPage /></RouteContent>} />
         <Route path="login" element={<Navigate to={getDashboardPath(session.role)} replace />} />
         <Route path="*" element={<RouteContent><NotFoundPage /></RouteContent>} />
-      </Route>
-      <Route element={<DashboardLayout />}>
         <Route path="dashboard/student" element={<RouteContent><ProtectedRoute role="student"><StudentDashboardPage /></ProtectedRoute></RouteContent>} />
         <Route path="dashboard/lecturer" element={<RouteContent><ProtectedRoute role="lecturer"><LecturerDashboardPage /></ProtectedRoute></RouteContent>} />
         <Route path="dashboard/admin" element={<RouteContent><ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute></RouteContent>} />
