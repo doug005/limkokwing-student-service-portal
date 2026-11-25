@@ -35,7 +35,7 @@ const NAVIGATION = {
     { label: 'Academic Structure', to: '/dashboard/admin?view=academics', icon: GraduationCap },
     { label: 'Students', to: '/dashboard/admin?view=students', icon: UsersRound },
     { label: 'Staff', to: '/dashboard/admin?view=staff', icon: UsersRound },
-    { label: 'Courses & Timetables', to: '/dashboard/admin?view=academics', icon: CalendarDays },
+    { label: 'Courses & Timetables', to: '/dashboard/admin?view=courses', icon: CalendarDays },
     { label: 'Fee Management', to: '/dashboard/admin?view=fees', icon: FilePlus2 },
     { label: 'Approvals & Workflows', to: '/requests', icon: ClipboardList },
     { label: 'Service Requests', to: '/requests', icon: ClipboardList },
@@ -81,7 +81,7 @@ export default function DashboardLayout() {
       <aside className={`dashboard-sidebar${menuOpen ? ' dashboard-sidebar--open' : ''}`}>
         <div className="dashboard-sidebar__brand"><NavLink to={getDashboardPath(session.role)} aria-label="Limkokwing dashboard home"><BrandMark /></NavLink><strong>{ROLE_TITLES[session.role]}</strong></div>
         <nav className="dashboard-sidebar__nav" aria-label={`${roleLabel} navigation`}>
-          {navigation.map(({ label, to, icon: Icon, end }) => <NavLink key={label} to={to} end={end} className={({ isActive }) => `dashboard-sidebar__link${isActive ? ' is-active' : ''}`}><Icon size={19} /><span>{label}</span></NavLink>)}
+          {navigation.map(({ label, to, icon: Icon, end }) => <NavLink key={label} to={to} end={end} className={() => `dashboard-sidebar__link${location.pathname === to.split(/[?#]/)[0] && (new URLSearchParams(location.search).get('view') || '') === (new URLSearchParams(to.split('?')[1] || '').get('view') || '') && location.hash === (to.includes('#') ? '#' + to.split('#')[1] : '') && label !== 'Approvals & Workflows' ? ' is-active' : ''}`}><Icon size={19} /><span>{label}</span></NavLink>)}
         </nav>
         <div className="dashboard-sidebar__bottom">
           <NavLink to={`${getDashboardPath(session.role)}#settings`} className="dashboard-sidebar__link"><Settings2 size={19} /><span>Settings</span></NavLink>
