@@ -5,7 +5,7 @@ import { getFacultyByCode, getStudentByNumber } from '../data/students.js';
 import { useRoleSession } from '../services/roleAuth.js';
 
 const quickActions = [
-  { label: 'Course Registration', icon: UserRound, to: '/request?service=registration-assistance' },
+  { label: 'Course Registration', icon: UserRound, to: '/dashboard/student?view=registration' },
   { label: 'Timetable', icon: CalendarDays, to: '/dashboard/student?view=timetable' },
   { label: 'QR Attendance Check-in', icon: QrCode, to: '/dashboard/student?view=attendance' },
   { label: 'Results & Grades', icon: BarChartIcon, to: '/dashboard/student?view=results' },
@@ -44,6 +44,7 @@ export default function StudentDashboardPage() {
 
   if (!student) return <section className="reference-dashboard"><div className="reference-empty">Student record unavailable.</div></section>;
 
+  if (view || window.location.hash === '#profile') return <AcademicWorkspace key={view || 'profile'} view={view || 'profile'} student={student}/>;
   const viewContent = {
     academics: { title: 'Academic information', text: 'Your programme, faculty, current semester, and academic support links are available from this workspace.', action: <Link className="reference-primary-button" to="/services">Browse academic services <ArrowRight size={15} /></Link> },
     timetable: { title: 'Academic timetable', text: 'Your upcoming classes are shown below. Use the timetable links to keep your weekly schedule close.', action: <a className="reference-primary-button" href="#timetable">Jump to timetable <ArrowRight size={15} /></a> },
@@ -92,3 +93,23 @@ export default function StudentDashboardPage() {
 }
 
 function WorkspaceTable({headers,rows}) {return <div style={{overflowX:'auto',margin:'16px 0'}}><table style={{width:'100%',borderCollapse:'collapse',textAlign:'left',fontSize:14}}><thead style={{background:'#e8eef7'}}><tr>{headers.map(h=><th key={h} style={{padding:12}}>{h}</th>)}</tr></thead><tbody>{rows.length ? rows.map((row,i)=><tr key={i}>{row.map((cell,j)=><td key={j} style={{padding:12,borderBottom:'1px solid #dce3ed'}}>{cell}</td>)}</tr>):<tr><td colSpan={headers.length} style={{padding:24,textAlign:'center'}}>No records available</td></tr>}</tbody></table></div>}
+
+const modules=[['DIWP3110','Web Design II',3,'Monday','09:00 – 11:00','Lab A2'],['DAMA3110','Data Models & Algorithms',4,'Tuesday','12:00 – 14:00','Lab B1'],['BIPS3110','Probability & Statistics II',3,'Wednesday','15:00 – 17:00','Room C3'],['HCI3110','Human–Computer Interaction',3,'Thursday','09:00 – 11:00','Room B2'],['SENG3110','Software Engineering II',4,'Friday','12:00 – 14:00','Lab A1']];
+function AcademicTable({headers,rows}){return <div style={{overflowX:'auto'}}><table style={{width:'100%',borderCollapse:'collapse',fontSize:14}}><thead><tr style={{background:'#e8eef6'}}>{headers.map(h=><th key={h} style={{padding:10,textAlign:'left'}}>{h}</th>)}</tr></thead><tbody>{rows.map((row,i)=><tr key={i}>{row.map((v,j)=><td key={j} style={{padding:10,borderBottom:'1px solid #dce3ed'}}>{v}</td>)}</tr>)}</tbody></table></div>}
+function AcademicWorkspace({view,student}){
+const [tab,setTab]=useState('lecture');const [query,setQuery]=useState('');
+const titles={academics:'Course Registration',registration:'Course Registration',timetable:'Timetable',attendance:'Attendance',results:'Results & Grades',payments:'Fees & Payments',assignments:'Assignments',notifications:'Notifications',announcements:'Announcements',profile:'Profile',applications:'Applications'};
+const card=(title,body)=><section className="reference-card" style={{padding:20,marginBottom:16}}><h2 style={{marginBottom:16}}>{title}</h2>{body}</section>;
+const empty=t=><p style={{padding:20,color:'#64748b'}}>{t}</p>;
+return <section className="reference-dashboard student-reference"><div className="reference-heading"><div><h1>{titles[view]||'Student workspace'}</h1><p>{student.programme} · {student.year}, Semester 1</p></div></div>
+{['academics','registration'].includes(view)&&<>{card('Registered Courses',empty('No verified enrollment records.'))}{card('Sample curriculum',<><input aria-label="Search courses" placeholder="Search courses" value={query} onChange={e=>setQuery(e.target.value)} style={{padding:10,marginBottom:12}}/><AcademicTable headers={['Code','Course title','Units','Schedule']} rows={modules.filter(c=>c.join(' ').toLowerCase().includes(query.toLowerCase())).map(c=>[c[0],c[1],c[2],c[3]+' '+c[4]])}/><Link className="reference-primary-button" to="/request?service=registration-assistance">Request registration assistance</Link></>)}</>}
+{view==='timetable'&&card('Weekly Timetable',<><div style={{display:'flex',gap:10,marginBottom:16}}>{['lecture','exam'].map(t=><button key={t} className="reference-primary-button" style={{opacity:tab===t?1:.6}} onClick={()=>setTab(t)}>{t==='lecture'?'Lecture Timetable':'Exam Timetable'}</button>)}</div>{tab==='lecture'?<><p>Sample schedule</p><AcademicTable headers={['Time','Monday','Tuesday','Wednesday','Thursday','Friday']} rows={['09:00 – 11:00','12:00 – 14:00','15:00 – 17:00'].map(time=>[time,...['Monday','Tuesday','Wednesday','Thursday','Friday'].map(day=>modules.filter(c=>c[3]===day&&c[4]===time).map(c=>c[0]+' · '+c[5]).join(', ')||'—')])}/></>:empty('No published examination schedule.')}</>)}
+{view==='attendance'&&<>{card('Check-In to Class',empty('No active lecturer-verified session.'))}{card('Course Attendance Summary',<AcademicTable headers={['Course','Sessions attended','Attendance']} rows={modules.map(c=>[c[1],'—','Not recorded'])}/>)}{card('Attendance History',empty('No verified records.'))}</>}
+{view==='results'&&<><div className="reference-stat-grid">{['Semester GPA','Cumulative CGPA','Class of Degree','Academic Standing'].map(t=><article key={t} className="reference-stat"><span><strong>{t}</strong><b>—</b></span></article>)}</div>{card('Semester Results',<AcademicTable headers={['Code','Course','Units','CA','Exam','Total','Grade','Grade Point']} rows={modules.map(c=>[c[0],c[1],c[2],'—','—','—','—','—'])}/>)}{card('GPA History',empty('No published grades.'))}<Link className="reference-primary-button" to="/request?service=academic-transcript">Request transcript</Link></>}
+{view==='payments'&&<>{card('Outstanding Balance',empty('No verified fee statement connected.'))}{card('Current Semester Charges',empty('No published charges.'))}{card('Payment History',empty('No verified payments.'))}<Link className="reference-primary-button" to="/request?service=general-enquiry">Contact finance office</Link></>}
+{view==='assignments'&&card('Course Assignments',empty('No published assignments.'))}
+{view==='notifications'&&card('Notifications',empty('No notifications available.'))}
+{view==='announcements'&&card('Announcements & News',empty('No published announcements.'))}
+{view==='applications'&&card('Applications',<Link className="reference-primary-button" to="/services">Browse student services</Link>)}
+{view==='profile'&&card('Personal Information',<AcademicTable headers={['Field','Details']} rows={[[ 'Name',student.name],['Student number',student.studentNumber],['Email',student.email],['Programme',student.programme],['Faculty',student.faculty]]}/>)}
+</section>}
