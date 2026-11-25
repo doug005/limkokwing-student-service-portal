@@ -52,7 +52,7 @@ export const DEMO_ACCOUNTS = {
   },
 };
 
-export const LECTURERS = ['FICT','FCMB','FBMG','FCTH'].flatMap((faculty)=>Array.from({length:4},(_,i)=>({role:'lecturer',faculty,index:i,identifier:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',email:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',displayName:faculty==='FICT'&&i===0?'Dr. Naledi Ralefala':faculty+' Lecturer '+(i+1),password:'lecturer123'})));
+export const LECTURERS = ['FICT','FCMB','FBMG','FCTH'].flatMap((faculty)=>Array.from({length:1},(_,i)=>({role:'lecturer',faculty,index:i,identifier:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',email:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',displayName:faculty==='FICT'&&i===0?'Dr. Naledi Ralefala':faculty+' Lecturer '+(i+1),password:'lecturer123'})));
 export function getDashboardPath(role) {
   return `/dashboard/${role}`;
 }
