@@ -40,10 +40,23 @@ export default function AdminDashboardPage() {
     const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'limkokwing-student-directory.csv'; anchor.click(); URL.revokeObjectURL(url);
   }
 
+  if (view) {
+    const titles = {access:'Access Control (RBAC)',academics:'Academic Structure',courses:'Courses & Timetables',students:'Students',staff:'Staff',fees:'Fee Management',reports:'Analytics & Reports',settings:'System Settings'};
+    return <section className="reference-dashboard admin-reference"><div className="reference-heading"><h1>{titles[view] || 'Workspace'}</h1></div><section className="reference-card" style={{padding:20}}>
+      {view === 'students' && <><label className="reference-search"><Search size={16}/><input aria-label="Search students" placeholder="Search students" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)}/></label><div className="admin-directory-table">{filteredStudents.map(s=><div key={s.id}><span>{s.studentNumber}</span><strong>{s.name}<small>{s.programme}</small></strong><b>{s.faculty}</b><span>{s.status}</span></div>)}</div>{!filteredStudents.length && <p>No matching students.</p>}</>}
+      {view === 'access' && <div className="system-list">{[['Student','Own academic workspace and service submissions'],['Lecturer','Course workspace and class directory'],['Administrator','University directory and request management']].map(([role,permissions])=><div key={role}><ShieldCheck size={18}/><strong>{role}</strong><span>{permissions}</span></div>)}<p>Demo roles only. Production role editing is not configured.</p></div>}
+      {view === 'academics' && <div className="system-list">{facultyCounts.map(f=><div key={f.code}><GraduationCap size={18}/><strong>{f.name}</strong><span>{f.count} students</span></div>)}</div>}
+      {view === 'courses' && <p>No centrally managed course or timetable records are configured.</p>}
+      {view === 'staff' && <div className="system-list"><div><UsersRound size={18}/><strong>Lecturer</strong><span>lecturer@limkokwing.ac.ls</span></div><div><ShieldCheck size={18}/><strong>Administrator</strong><span>admin@limkokwing.ac.ls</span></div><p>Demo accounts</p></div>}
+      {view === 'fees' && <p>No verified fee ledger is connected.</p>}
+      {view === 'reports' && <><div className="system-list">{facultyCounts.map(f=><div key={f.code}><span>{f.name}</span><b>{f.count}</b></div>)}</div><button className="reference-primary-button" onClick={generateReport}>Export student directory CSV</button></>}
+      {view === 'settings' && <div className="system-list"><div><Settings2 size={18}/><span>Authentication</span><b>Demo</b></div><div><Layers3 size={18}/><span>Student services</span><b>6</b></div><div><GraduationCap size={18}/><span>Faculties</span><b>{FACULTIES.length}</b></div></div>}
+    </section></section>;
+  }
+
   return (
     <section className="reference-dashboard admin-reference">
       <div className="reference-heading reference-heading--with-date"><div><h1>Welcome, Administrator</h1><p>Manage university services, users, academic data and system operations.</p></div><span className="reference-date"><CalendarDays size={17} /> Tue, 25 Nov 2026</span></div>
-      {workspaceMessage && <section className="reference-view-panel reference-card"><div><p className="reference-view-panel__eyebrow">Administrator workspace</p><h2>{workspaceMessage[0]}</h2><p>{workspaceMessage[1]}</p></div><a className="reference-primary-button" href="#admin-directory">Open directory <ArrowRight size={15} /></a></section>}
       <div className="reference-stat-grid"><Stat icon={GraduationCap} label="Total Students" value="4,286" tone="teal" /><Stat icon={UsersRound} label="Total Staff" value="318" tone="blue" /><Stat icon={CheckCircle2} label="Pending Approvals" value="27" tone="gold" /><Stat icon={Wallet} label="Fee Collections" value="M1,248,500" tone="green" /></div>
 
       <section className="reference-section admin-quick-section"><h2>Quick Actions</h2><div className="admin-quick-grid">{quickActions.map(([label, Icon, to]) => label === 'Generate Report' ? <a className="admin-quick-card" href={to} onClick={generateReport} key={label}><Icon size={27} /><strong>{label}</strong></a> : <Link className="admin-quick-card" to={to} key={label}><Icon size={27} /><strong>{label}</strong></Link>)}</div></section>
