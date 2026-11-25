@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
@@ -8,6 +8,7 @@ import { services } from '../data/services.js';
 export default function ServicesPage() {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
+  useEffect(() => setSearchTerm(searchParams.get('search') || ''), [searchParams]);
   const filteredServices = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     if (!search) return services;
@@ -21,9 +22,9 @@ export default function ServicesPage() {
     <section className="shell page-section">
       <PageHeader
         eyebrow="Student services"
-        title={<>The right support,<br /><em>all in one place.</em></>}
+        title="Student Services"
         description="Browse services by the office that handles them. Every service is available on each working day."
-        action={<div className="page-heading__aside"><span>06</span><small>available services</small></div>}
+        action={<div className="page-heading__aside"><span>{services.length}</span><small>available services</small></div>}
       />
       <div className="services-toolbar">
         <div className="services-toolbar__label"><SlidersHorizontal size={16} /> <span>Browse services</span></div>
