@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, Bell, BookOpen, CalendarDays, ClipboardList, FilePlus2, GraduationCap, LayoutDashboard, LogOut, Menu, Search, Settings2, UsersRound, X } from 'lucide-react';
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { isFirebaseConfigured } from '../services/firebase.js';
+import { signOutRequestManager } from '../services/requestService.js';
 import BrandMark from '../components/BrandMark.jsx';
 import { getDashboardPath, signOutDemo, useRoleSession } from '../services/roleAuth.js';
 
@@ -8,6 +10,7 @@ const NAVIGATION = {
   student: [
     { label: 'Dashboard', to: '/dashboard/student', icon: LayoutDashboard, end: true },
     { label: 'Services', to: '/services', icon: BookOpen },
+    { label: 'New Request', to: '/request', icon: FilePlus2 },
     { label: 'My Requests', to: '/requests', icon: ClipboardList },
     { label: 'Academics', to: '/dashboard/student?view=academics', icon: GraduationCap },
     { label: 'Payments', to: '/dashboard/student?view=payments', icon: FilePlus2 },
@@ -53,7 +56,8 @@ export default function DashboardLayout() {
 
   useEffect(() => setMenuOpen(false), [location.pathname, location.search]);
 
-  function handleSignOut() {
+  async function handleSignOut() {
+    try { if (isFirebaseConfigured) await signOutRequestManager(); } catch (error) { console.error('Firebase sign-out failed', error); window.alert('Could not sign out of Firebase. Please try again.'); return; }
     signOutDemo();
     navigate('/login', { replace: true });
   }
