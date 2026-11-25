@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { ArrowRight, Search, SlidersHorizontal } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import ServiceCard from '../components/ServiceCard.jsx';
 import { services } from '../data/services.js';
 
 export default function ServicesPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
   const filteredServices = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     if (!search) return services;

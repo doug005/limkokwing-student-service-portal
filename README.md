@@ -13,7 +13,7 @@ The frontend is React, built with webpack and served by a Node.js/Express applic
 - Confirmation page with the real saved request reference and details after a successful Firestore write.
 - Firestore create/read/update/delete operations for `studentRequests`.
 - Staff request management with live updates, status counts, search, details, status changes, and confirmed deletion.
-- Role-based demo login with Student, Lecturer, and Administrator dashboards.
+- Login-only entry gateway with the Limkokwing campus hero background; credentials infer Student, Lecturer, or Administrator access and open the matching dashboard.
 - Twenty seeded students distributed across FICT, FCMB, FBMG, and FCTH; every student number begins with `90101` and ends with four randomised digits.
 - Responsive navigation, accessible field errors, and loading, empty, and failure states.
 - Firestore rules that allow validated student request creation while restricting reads, updates, and deletes to approved staff.
@@ -115,7 +115,7 @@ The included `firestore.rules` allow unsigned students to create requests matchi
 
 ## Role-based demo login
 
-The new role dashboards are available from `/login`. They use a browser-local demo session so the role experience works on the existing static Vercel deployment without requiring Firebase credentials. Use the following seeded accounts:
+The entire site is gated by `/login`: unauthenticated visitors see only the full-screen login gateway, and no role selector or public navigation is available until valid credentials are supplied. The role dashboards use a browser-local demo session so the experience works on the existing static Vercel deployment without requiring Firebase credentials. Use the following seeded accounts:
 
 | Role | Username | Password | Destination |
 | --- | --- | --- | --- |

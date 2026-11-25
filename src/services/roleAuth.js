@@ -120,6 +120,47 @@ export function signInDemo({ role, identifier, password }) {
   });
 }
 
+export function signInWithCredentials({ identifier, password }) {
+  const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
+  const suppliedPassword = String(password || '');
+
+  if (!normalizedIdentifier || !suppliedPassword) {
+    throw authError('Enter your username and password to continue.');
+  }
+
+  const student = getStudentByNumber(normalizedIdentifier)
+    || students.find((item) => item.email.toLowerCase() === normalizedIdentifier);
+
+  if (student && suppliedPassword === DEMO_ACCOUNTS.student.password) {
+    return saveSession({
+      role: 'student',
+      name: student.name,
+      email: student.email,
+      studentId: student.studentNumber,
+      faculty: student.faculty,
+      programme: student.programme,
+      signedInAt: new Date().toISOString(),
+    });
+  }
+
+  const staffAccount = Object.values(DEMO_ACCOUNTS).find((account) => (
+    account.role !== 'student'
+    && account.identifier.toLowerCase() === normalizedIdentifier
+    && account.password === suppliedPassword
+  ));
+
+  if (staffAccount) {
+    return saveSession({
+      role: staffAccount.role,
+      name: staffAccount.displayName,
+      email: staffAccount.email,
+      signedInAt: new Date().toISOString(),
+    });
+  }
+
+  throw authError('Those credentials were not recognised. Check your username and password, then try again.');
+}
+
 export function signOutDemo() {
   if (typeof window === 'undefined') return;
   window.localStorage.removeItem(ROLE_SESSION_KEY);

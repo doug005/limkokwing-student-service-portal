@@ -1585,3 +1585,81 @@ h1, h2, h3, h4,
   .dashboard-main__content .dashboard-page .page-heading h1 { font-size: 40px; }
   .dashboard-topbar__search input { font-size: 8px; }
 }
+
+/* Auth gateway inspired by the supplied EduManage reference */
+.login-gateway { position: relative; display: grid; min-height: 100vh; grid-template-columns: minmax(0, 1.08fr) minmax(390px, .92fr); overflow: hidden; background: #071725 url('../../public/images/limkokwing-campus-hero.jpg') center / cover no-repeat; }
+.login-gateway__overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4,17,28,.9) 0%, rgba(4,17,28,.72) 46%, rgba(4,17,28,.3) 100%); }
+.login-gateway__content, .login-gateway__card { position: relative; z-index: 1; }
+.login-gateway__content { display: flex; min-height: 100vh; flex-direction: column; justify-content: space-between; padding: 39px clamp(32px, 7vw, 110px) 33px; color: #fff; }
+.login-gateway__brand { display: flex; align-items: center; gap: 12px; }
+.login-gateway__mark { display: flex; width: 43px; height: 43px; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,.35); border-radius: 12px; background: rgba(0,111,177,.5); }
+.login-gateway__brand strong, .login-gateway__brand span { display: block; }
+.login-gateway__brand strong { font-size: 20px; letter-spacing: -.04em; }
+.login-gateway__brand span { margin-top: 1px; color: rgba(255,255,255,.68); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+.login-gateway__message { max-width: 590px; margin-block: auto; padding-block: 80px 52px; }
+.login-gateway__kicker { display: flex; align-items: center; gap: 10px; margin: 0 0 24px; color: #8de4ff; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.login-gateway__kicker span { display: inline-block; width: 31px; height: 2px; background: #2c9cf4; }
+.login-gateway__message h1 { margin: 0 0 23px; color: #fff; font-family: var(--sans); font-size: clamp(44px, 5.2vw, 76px); font-weight: 700; letter-spacing: -.065em; line-height: .99; }
+.login-gateway__message h1 em { color: #8de4ff; font-style: normal; }
+.login-gateway__description { max-width: 500px; margin: 0; color: rgba(255,255,255,.74); font-size: 14px; line-height: 1.8; }
+.login-gateway__features { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 38px; }
+.login-gateway__features span { display: inline-flex; min-width: 125px; flex-direction: column; gap: 9px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.15); border-radius: 12px; background: rgba(2,17,30,.42); color: #dff7ff; backdrop-filter: blur(5px); }
+.login-gateway__features small { color: rgba(255,255,255,.74); font-size: 9px; font-weight: 700; }
+.login-gateway__footer { margin: 0; color: rgba(255,255,255,.5); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+.login-gateway__card { display: flex; width: min(495px, calc(100% - 48px)); min-height: min(742px, calc(100vh - 58px)); flex-direction: column; justify-content: center; align-self: center; margin: 29px 42px 29px auto; padding: clamp(29px, 4vw, 52px) clamp(27px, 4vw, 50px); border: 1px solid rgba(255,255,255,.65); border-radius: 25px; background: rgba(249,251,255,.96); box-shadow: 0 25px 70px rgba(0,0,0,.28); }
+.login-gateway__card-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; color: #1365b6; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.login-gateway__card-heading { margin-bottom: 25px; }
+.login-gateway__card-heading .eyebrow { margin-bottom: 11px; color: #1268d5; }
+.login-gateway__card-heading h2 { margin: 0 0 15px; color: #101d2c; font-family: var(--sans); font-size: clamp(31px, 3.1vw, 42px); font-weight: 750; letter-spacing: -.055em; line-height: 1.03; }
+.login-gateway__card-heading h2 em { color: #1365b6; font-style: normal; }
+.login-gateway__card-heading p:last-child { max-width: 355px; margin: 0; color: #68798a; font-size: 11px; line-height: 1.7; }
+.login-gateway__form { display: grid; gap: 17px; }
+.login-gateway__form .form-label { color: #1c2c3b; font-size: 10px; }
+.login-gateway__input-wrap { display: flex; height: 53px; align-items: center; gap: 11px; padding: 0 15px; border: 1px solid #cfd9e3; border-radius: 12px; background: #fff; color: #5c7a94; transition: border-color .2s ease, box-shadow .2s ease; }
+.login-gateway__input-wrap:focus-within { border-color: #1976d2; box-shadow: 0 0 0 4px rgba(25,118,210,.1); }
+.login-gateway__input-wrap input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #192c3e; font-size: 12px; }
+.login-gateway__input-wrap input::placeholder { color: #98a6b2; }
+.login-gateway__password-toggle { display: inline-flex; align-items: center; justify-content: center; padding: 4px; border: 0; background: transparent; color: #5c7a94; cursor: pointer; }
+.login-gateway__submit { display: inline-flex; min-height: 54px; align-items: center; justify-content: center; gap: 12px; margin-top: 7px; border: 0; border-radius: 11px; background: linear-gradient(100deg, #075fce, #147de5); box-shadow: 0 11px 20px rgba(13,102,207,.2); color: #fff; cursor: pointer; font-size: 13px; font-weight: 750; transition: transform .2s ease, filter .2s ease; }
+.login-gateway__submit:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.login-gateway__submit:disabled { cursor: not-allowed; opacity: .6; }
+.login-gateway__demo { margin-top: 27px; padding-top: 18px; border-top: 1px solid #dbe3ea; color: #667788; font-size: 9px; line-height: 1.65; }
+.login-gateway__demo > div { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; color: #214769; }
+.login-gateway__demo p { margin: 3px 0; }
+.login-gateway__demo code { padding: 2px 4px; border-radius: 4px; background: #eaf1f7; color: #14598d; font-size: 9px; }
+.login-gateway__note { margin: 24px 0 0; color: #8998a5; font-size: 8px; line-height: 1.65; }
+.login-gateway .form-alert { margin-bottom: 16px; border-radius: 8px; }
+.spinner--small { width: 15px; height: 15px; border-width: 2px; }
+
+/* Small interaction affordances in the signed-in shell */
+.dashboard-topbar__notification-wrap { position: relative; }
+.dashboard-topbar__notification { position: relative; display: inline-flex; width: 31px; height: 31px; align-items: center; justify-content: center; border: 1px solid #38546B; border-radius: 50%; background: transparent; color: #F3CE78; cursor: pointer; }
+.dashboard-topbar__notification:hover { border-color: #8DE4FF; color: #fff; }
+.dashboard-topbar__notification-dot { position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: #2c9cf4; }
+.dashboard-notification-panel { position: absolute; z-index: 60; top: 43px; right: 0; width: 220px; padding: 15px; border: 1px solid #38546B; border-radius: 10px; background: #101B27; box-shadow: 0 16px 35px rgba(0,0,0,.3); }
+.dashboard-notification-panel strong, .dashboard-notification-panel p, .dashboard-notification-panel small { display: block; }
+.dashboard-notification-panel strong { color: #fff; font-size: 10px; }
+.dashboard-notification-panel p { margin: 10px 0 3px; color: #D1DCE8; font-size: 10px; }
+.dashboard-notification-panel small { color: #8093A7; font-size: 8px; line-height: 1.5; }
+
+@media (max-width: 900px) {
+  .login-gateway { grid-template-columns: 1fr; }
+  .login-gateway__content { min-height: 430px; padding-bottom: 28px; }
+  .login-gateway__message { padding-block: 70px 25px; }
+  .login-gateway__message h1 { font-size: clamp(42px, 9vw, 62px); }
+  .login-gateway__card { width: min(600px, calc(100% - 40px)); min-height: auto; margin: 0 auto 30px; }
+}
+@media (max-width: 560px) {
+  .login-gateway__content { min-height: 390px; padding: 25px 22px; }
+  .login-gateway__message { padding-block: 45px 20px; }
+  .login-gateway__description { font-size: 12px; }
+  .login-gateway__features { gap: 7px; margin-top: 25px; }
+  .login-gateway__features span { min-width: 0; flex: 1 1 28%; padding: 10px; }
+  .login-gateway__features small { font-size: 8px; }
+  .login-gateway__card { width: calc(100% - 28px); margin-bottom: 14px; padding: 28px 22px; border-radius: 19px; }
+  .login-gateway__card-brand { margin-bottom: 27px; }
+  .dashboard-topbar { gap: 10px; padding-inline: 12px; }
+  .dashboard-topbar__search { width: auto; flex: 1; }
+  .dashboard-topbar__search kbd, .dashboard-topbar__account-copy, .dashboard-topbar__account > .role-badge { display: none; }
+  .dashboard-topbar__account { gap: 6px; }
+}
