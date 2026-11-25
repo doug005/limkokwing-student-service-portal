@@ -24,12 +24,13 @@ const NAVIGATION = {
   lecturer: [
     { label: 'Dashboard', to: '/dashboard/lecturer', icon: LayoutDashboard, end: true },
     { label: 'My Courses', to: '/dashboard/lecturer?view=courses', icon: BookOpen },
-    { label: 'Students', to: '/dashboard/lecturer?view=students', icon: UsersRound },
+    { label: 'Class Lists', to: '/dashboard/lecturer?view=students', icon: UsersRound },
     { label: 'Assignments', to: '/dashboard/lecturer?view=assignments', icon: FilePlus2 },
-    { label: 'Grades & Results', to: '/dashboard/lecturer?view=results', icon: BarChart3 },
-    { label: 'Learning Materials', to: '/dashboard/lecturer?view=materials', icon: BookOpen },
+    { label: 'Grade Entry', to: '/dashboard/lecturer?view=results', icon: BarChart3 },
+    { label: 'Content Management', to: '/dashboard/lecturer?view=materials', icon: BookOpen },
     { label: 'Announcements', to: '/dashboard/lecturer?view=announcements', icon: Bell },
-    { label: 'Service Requests', to: '/requests', icon: ClipboardList },
+    { label: 'Analytics', to: '/dashboard/lecturer?view=analytics', icon: BarChart3 },
+    { label: 'Reports', to: '/dashboard/lecturer?view=reports', icon: ClipboardList },
   ],
   admin: [
     { label: 'Dashboard', to: '/dashboard/admin', icon: LayoutDashboard, end: true },
@@ -46,7 +47,7 @@ const NAVIGATION = {
   ],
 };
 
-const ROLE_TITLES = { student: 'Student Service Request System', lecturer: 'Student Service Request System', admin: 'Student Service Request System' };
+const ROLE_TITLES = { student: 'Student Service Request System', lecturer: 'Lecturer Portal', admin: 'Student Service Request System' };
 
 export default function DashboardLayout() {
   const session = useRoleSession();
