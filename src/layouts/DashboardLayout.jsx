@@ -25,10 +25,8 @@ const NAVIGATION = {
     { label: 'Dashboard', to: '/dashboard/lecturer', icon: LayoutDashboard, end: true },
     { label: 'My Courses', to: '/dashboard/lecturer?view=courses', icon: BookOpen },
     { label: 'Class Lists', to: '/dashboard/lecturer?view=students', icon: UsersRound },
-    { label: 'Assignments', to: '/dashboard/lecturer?view=assignments', icon: FilePlus2 },
     { label: 'Grade Entry', to: '/dashboard/lecturer?view=results', icon: BarChart3 },
     { label: 'Content Management', to: '/dashboard/lecturer?view=materials', icon: BookOpen },
-    { label: 'Announcements', to: '/dashboard/lecturer?view=announcements', icon: Bell },
     { label: 'Analytics', to: '/dashboard/lecturer?view=analytics', icon: BarChart3 },
     { label: 'Reports', to: '/dashboard/lecturer?view=reports', icon: ClipboardList },
   ],
@@ -88,7 +86,7 @@ export default function DashboardLayout() {
           {navigation.map(({ label, to, icon: Icon, end }) => <NavLink key={label} to={to} end={end} className={() => `dashboard-sidebar__link${location.pathname === to.split(/[?#]/)[0] && (new URLSearchParams(location.search).get('view') || '') === (new URLSearchParams(to.split('?')[1] || '').get('view') || '') && location.hash === (to.includes('#') ? '#' + to.split('#')[1] : '') && label !== 'Approvals & Workflows' ? ' is-active' : ''}`}><Icon size={19} /><span>{label}</span></NavLink>)}
         </nav>
         <div className="dashboard-sidebar__bottom">
-          <NavLink to={`${getDashboardPath(session.role)}#settings`} className="dashboard-sidebar__link"><Settings2 size={19} /><span>Settings</span></NavLink>
+          {session.role !== "lecturer" && <NavLink to={`${getDashboardPath(session.role)}#settings`} className="dashboard-sidebar__link"><Settings2 size={19} /><span>Settings</span></NavLink>}
           <button type="button" className="dashboard-sidebar__link dashboard-sidebar__logout" onClick={handleSignOut}><LogOut size={19} /><span>Logout</span></button>
         </div>
       </aside>
