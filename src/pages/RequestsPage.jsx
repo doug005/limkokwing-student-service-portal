@@ -150,6 +150,8 @@ export default function RequestsPage() {
   const [activeRequest, setActiveRequest] = useState(null);
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     if (!isFirebaseConfigured) return undefined;
@@ -213,12 +215,13 @@ export default function RequestsPage() {
 
   const filteredRequests = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
-    if (!search) return requests;
     return requests.filter((request) =>
-      [request.studentName, request.studentId, request.email, request.serviceName, request.status, request.id]
-        .some((value) => String(value ?? '').toLowerCase().includes(search)),
+      (!serviceFilter || request.serviceName === serviceFilter) &&
+      (!statusFilter || request.status === statusFilter) &&
+      (!search || [request.studentName, request.studentId, request.email, request.serviceName, request.status, request.id]
+        .some((value) => String(value ?? '').toLowerCase().includes(search))),
     );
-  }, [requests, searchTerm]);
+  }, [requests, searchTerm, serviceFilter, statusFilter]);
 
   const statusCounts = useMemo(() => REQUEST_STATUSES.reduce((counts, status) => {
     counts[status] = requests.filter((request) => request.status === status).length;
@@ -267,7 +270,7 @@ export default function RequestsPage() {
     <section className="shell page-section requests-page">
       <PageHeader
         eyebrow="Request management"
-        title={<>Request <em>command centre.</em></>}
+        title="Service Requests"
         description="A focused workspace for reviewing student requests, moving work forward, and keeping every record current."
         action={user && authorized ? <button type="button" className="sign-out-button" onClick={handleSignOut}><LogOut size={15} /> Sign out</button> : null}
       />
@@ -296,6 +299,12 @@ export default function RequestsPage() {
           <div className="request-console__heading">
             <div><p className="eyebrow">Live from Firestore</p><h2>Work queue <span>{filteredRequests.length}</span></h2></div>
             <label className="search-control search-control--table"><Search size={16} aria-hidden="true" /><span className="visually-hidden">Search requests</span><input type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search by name, service, ID…" /></label>
+          </div>
+          <div className="services-toolbar">
+            <label htmlFor="request-service-filter">Service</label>
+            <select id="request-service-filter" value={serviceFilter} onChange={event => setServiceFilter(event.target.value)}><option value="">All services</option>{[...new Set(requests.map(request => request.serviceName))].sort().map(name => <option key={name} value={name}>{name}</option>)}</select>
+            <label htmlFor="request-status-filter">Status</label>
+            <select id="request-status-filter" value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="">All statuses</option>{REQUEST_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}</select>
           </div>
           {actionError && <div className="form-alert form-alert--error" role="alert"><AlertCircle size={17} />{actionError}</div>}
           {actionMessage && <div className="form-alert form-alert--success" role="status"><ShieldCheck size={17} />{actionMessage}</div>}
