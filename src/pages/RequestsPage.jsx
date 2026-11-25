@@ -150,6 +150,8 @@ export default function RequestsPage() {
   const [activeRequest, setActiveRequest] = useState(null);
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
@@ -306,6 +308,7 @@ export default function RequestsPage() {
             <label htmlFor="request-status-filter">Status</label>
             <select id="request-status-filter" value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="">All statuses</option>{REQUEST_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}</select>
           </div>
+          <div className="services-toolbar"><label htmlFor="queue-service">Service</label><select id="queue-service" value={serviceFilter} onChange={event => setServiceFilter(event.target.value)}><option value="">All services</option>{[...new Set(requests.map(request => request.serviceName))].sort().map(service => <option key={service}>{service}</option>)}</select><label htmlFor="queue-status">Status</label><select id="queue-status" value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="">All statuses</option>{REQUEST_STATUSES.map(status => <option key={status}>{status}</option>)}</select></div>
           {actionError && <div className="form-alert form-alert--error" role="alert"><AlertCircle size={17} />{actionError}</div>}
           {actionMessage && <div className="form-alert form-alert--success" role="status"><ShieldCheck size={17} />{actionMessage}</div>}
           {loadError && <div className="form-alert form-alert--error" role="alert"><AlertCircle size={17} />{loadError}<button className="inline-button" type="button" onClick={() => window.location.reload()}>Reload page</button></div>}
