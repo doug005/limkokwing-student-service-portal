@@ -1,72 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, BarChart3, BookOpen, CalendarDays, CheckCircle2, ClipboardList, GraduationCap, Layers3, Search, Settings2, ShieldCheck, UserPlus, UsersRound, Wallet } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { FACULTIES, students } from '../data/students.js';
-
-const activity = [
-  ['10:42 AM', 'Admin', 'Approved Service Request', 'REQ-1049 – Academic Transcript', CheckCircle2],
-  ['10:15 AM', 'Registrar', 'Updated Timetable', 'DIWP3110 – Web Design II (Tue 11:00)', CalendarDays],
-  ['09:48 AM', 'Finance Officer', 'Recorded Fee Payment', 'STD231045 – M5,000', Wallet],
-  ['09:20 AM', 'Admin', 'Added User', 'Staff – Dr. T. Naledi (Lecturer)', UserPlus],
-  ['08:57 AM', 'System', 'Role Updated', 'User – L. Mokoena → Lecturer', ShieldCheck],
-];
-
-const quickActions = [
-  ['Add Student', UserPlus, '/dashboard/admin?view=students'], ['Add Staff', UsersRound, '/dashboard/admin?view=staff'], ['Create Course', Layers3, '/dashboard/admin?view=academics'], ['Create Timetable', CalendarDays, '/dashboard/admin?view=academics'], ['Review Approvals', CheckCircle2, '/requests'], ['Generate Report', BarChart3, '#generate-report'],
-];
-
-export default function AdminDashboardPage() {
-  const [searchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
-  useEffect(() => setSearchTerm(searchParams.get('search') || ''), [searchParams]);
-  const view = searchParams.get('view') || '';
-  const workspaceMessage = view ? ({
-    access: ['Access Control (RBAC)', 'Role access is enabled for Student, Lecturer, and Administrator demo workspaces. Production claims should replace browser-local access before launch.'],
-    academics: ['Academic structure', 'Use the academic quick actions to review course and timetable coverage. The seeded directory currently represents four faculties.'],
-    students: ['Student management', 'The student directory below contains all 20 seeded records and supports search by name, student number, faculty, and programme.'],
-    staff: ['Staff management', 'Lecturer and administrator access is available through the role-aware sign-in gateway.'],
-    fees: ['Fee management', 'Fee collections are represented in the operational overview. Use the request queue for student fee enquiries.'],
-    reports: ['Analytics & reports', 'Generate a CSV report from the quick actions above, or review the activity and system cards below.'],
-    settings: ['System settings', 'Portal settings are represented by the current service, role, and faculty coverage shown in this workspace.'],
-  }[view] || null) : null;
-  const search = searchTerm.trim().toLowerCase();
-  const facultyCounts = useMemo(() => FACULTIES.map((faculty) => ({ ...faculty, count: students.filter((student) => student.faculty === faculty.code).length })), []);
-  const filteredStudents = useMemo(() => students.filter((student) => [student.name, student.studentNumber, student.email, student.faculty, student.programme].some((value) => value.toLowerCase().includes(search))), [search]);
-
-  function generateReport(event) {
-    event.preventDefault();
-    const csv = ['Student number,Name,Faculty,Programme,Year,Status', ...students.map((student) => [student.studentNumber, student.name, student.faculty, student.programme, student.year, student.status].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))].join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'limkokwing-student-directory.csv'; anchor.click(); URL.revokeObjectURL(url);
-  }
-
-  if (view) {
-    const titles = {access:'Access Control (RBAC)',academics:'Academic Structure',courses:'Courses & Timetables',students:'Students',staff:'Staff',fees:'Fee Management',reports:'Analytics & Reports',settings:'System Settings'};
-    return <section className="reference-dashboard admin-reference"><div className="reference-heading"><h1>{titles[view] || 'Workspace'}</h1></div><section className="reference-card" style={{padding:20}}>
-      {view === 'students' && <><label className="reference-search"><Search size={16}/><input aria-label="Search students" placeholder="Search students" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)}/></label><div className="admin-directory-table">{filteredStudents.map(s=><div key={s.id}><span>{s.studentNumber}</span><strong>{s.name}<small>{s.programme}</small></strong><b>{s.faculty}</b><span>{s.status}</span></div>)}</div>{!filteredStudents.length && <p>No matching students.</p>}</>}
-      {view === 'access' && <div className="system-list">{[['Student','Own academic workspace and service submissions'],['Lecturer','Course workspace and class directory'],['Administrator','University directory and request management']].map(([role,permissions])=><div key={role}><ShieldCheck size={18}/><strong>{role}</strong><span>{permissions}</span></div>)}<p>Demo roles only. Production role editing is not configured.</p></div>}
-      {view === 'academics' && <div className="system-list">{facultyCounts.map(f=><div key={f.code}><GraduationCap size={18}/><strong>{f.name}</strong><span>{f.count} students</span></div>)}</div>}
-      {view === 'courses' && <p>No centrally managed course or timetable records are configured.</p>}
-      {view === 'staff' && <div className="system-list"><div><UsersRound size={18}/><strong>Lecturer</strong><span>lecturer@limkokwing.ac.ls</span></div><div><ShieldCheck size={18}/><strong>Administrator</strong><span>admin@limkokwing.ac.ls</span></div><p>Demo accounts</p></div>}
-      {view === 'fees' && <p>No verified fee ledger is connected.</p>}
-      {view === 'reports' && <><div className="system-list">{facultyCounts.map(f=><div key={f.code}><span>{f.name}</span><b>{f.count}</b></div>)}</div><button className="reference-primary-button" onClick={generateReport}>Export student directory CSV</button></>}
-      {view === 'settings' && <div className="system-list"><div><Settings2 size={18}/><span>Authentication</span><b>Demo</b></div><div><Layers3 size={18}/><span>Student services</span><b>6</b></div><div><GraduationCap size={18}/><span>Faculties</span><b>{FACULTIES.length}</b></div></div>}
-    </section></section>;
-  }
-
-  return (
-    <section className="reference-dashboard admin-reference">
-      <div className="reference-heading reference-heading--with-date"><div><h1>Welcome, Administrator</h1><p>Manage university services, users, academic data and system operations.</p></div><span className="reference-date"><CalendarDays size={17} /> Tue, 25 Nov 2026</span></div>
-      <div className="reference-stat-grid"><Stat icon={GraduationCap} label="Total Students" value="4,286" tone="teal" /><Stat icon={UsersRound} label="Total Staff" value="318" tone="blue" /><Stat icon={CheckCircle2} label="Pending Approvals" value="27" tone="gold" /><Stat icon={Wallet} label="Fee Collections" value="M1,248,500" tone="green" /></div>
-
-      <section className="reference-section admin-quick-section"><h2>Quick Actions</h2><div className="admin-quick-grid">{quickActions.map(([label, Icon, to]) => label === 'Generate Report' ? <a className="admin-quick-card" href={to} onClick={generateReport} key={label}><Icon size={27} /><strong>{label}</strong></a> : <Link className="admin-quick-card" to={to} key={label}><Icon size={27} /><strong>{label}</strong></Link>)}</div></section>
-
-      <div className="admin-lower-grid"><section className="reference-card activity-card"><div className="reference-card__heading"><h2>Recent Activity</h2><Link to="/requests">View All Activity <ArrowRight size={15} /></Link></div><div className="activity-table"><div className="activity-table__head"><span>Time</span><span>User</span><span>Activity</span><span>Details</span></div>{activity.map(([time, user, action, detail, Icon]) => <div className="activity-table__row" key={`${time}-${action}`}><span>{time}</span><span><UsersRound size={15} /> <strong>{user}</strong></span><span><Icon size={15} /> {action}</span><span>{detail}</span></div>)}</div></section><section className="reference-card system-overview"><div className="reference-card__heading"><h2>System Overview</h2></div><div className="system-list"><div><Layers3 size={18} /><span>Active Services</span><b>6</b></div><div><BookOpen size={18} /><span>Active Courses</span><b>42</b></div><div><CalendarDays size={18} /><span>Timetables</span><b>12</b></div><div><ClipboardList size={18} /><span>Open Requests</span><b>63</b></div><div><BarChart3 size={18} /><span>System Status</span><b className="system-status"><CheckCircle2 size={13} /> Operational</b></div></div></section></div>
-
-      <section id="admin-directory" className="reference-card admin-directory-card"><div className="reference-card__heading"><div><h2>Student Directory</h2><small>{filteredStudents.length} seeded records across {FACULTIES.length} faculties</small></div><label className="reference-search"><Search size={16} /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search students, staff, requests…" aria-label="Search student directory" /></label></div><div className="admin-directory-table">{filteredStudents.slice(0, 8).map((student) => <div key={student.id}><span className="directory-initials">{student.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><strong>{student.name}<small>{student.studentNumber} · {student.programme}</small></strong><b>{student.faculty}</b><span>{student.status}</span></div>)}</div></section>
-      <p className="reference-footnote"><ShieldCheck size={15} /> Faculty coverage: {facultyCounts.map((faculty) => `${faculty.code} (${faculty.count})`).join(' · ')}.</p>
-    </section>
-  );
-}
-
-function Stat({ icon: Icon, label, value, tone }) { return <article className={`reference-stat reference-stat--${tone}`}><span className="reference-stat__icon"><Icon size={25} /></span><span><strong>{label}</strong><b>{value}</b></span></article>; }
+import {useState,useEffect,useRef} from 'react';
+import {Link,useSearchParams} from 'react-router-dom';
+import {GraduationCap,UsersRound,BookOpen,ClipboardList,BarChart3,ShieldCheck} from 'lucide-react';
+import {FACULTIES,students} from '../data/students.js';
+import {LECTURERS,DEMO_ACCOUNTS} from '../services/roleAuth.js';
+const titles={access:'Access Control',academics:'Academic Structure',courses:'Courses & Timetables',students:'Student Management',staff:'Staff Management',fees:'Fee Management',reports:'Analytics & Reports',settings:'System Settings'};
+const link=v=>'/dashboard/admin?view='+v;
+function Table({headers,rows}){return <div className="ax-table"><table><thead><tr>{headers.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((v,j)=><td key={j}>{v}</td>)}</tr>)}</tbody></table>{!rows.length&&<p>No matching records.</p>}</div>}
+function Card({title,children}){return <section className="ax-card"><h2>{title}</h2>{children}</section>}
+function csv(rows){const a=document.createElement('a');const u=URL.createObjectURL(new Blob([rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n')],{type:'text/csv'}));a.href=u;a.download='university-report.csv';a.click();URL.revokeObjectURL(u)}
+const staff=[...LECTURERS,DEMO_ACCOUNTS.admin];
+export default function AdminDashboardPage(){const [params]=useSearchParams();const view=params.get('view')||'';return <div className="ax"><style>{`
+.ax{font:14px Arial,sans-serif;color:#14243b;display:grid;gap:18px}.ax h1{font-size:30px;margin:0}.ax h2{font-size:18px;margin:0 0 16px}.ax p{color:#475569}.ax-card{background:white;border:1px solid #d9e1eb;border-radius:12px;padding:20px;min-width:0}.ax-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.ax-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.ax-stat{background:#e7effb;border-radius:10px;padding:20px;display:flex;gap:14px;align-items:center;color:#14243b;text-decoration:none}.ax-stat b{display:block;font-size:27px;margin-top:8px}.ax-table{overflow:auto}.ax table{width:100%;border-collapse:collapse;color:#14243b}.ax th,.ax td{text-align:left;padding:12px 10px;border-bottom:1px solid #e0e6ee;white-space:nowrap}.ax th{background:#edf2f8}.ax input,.ax select{background:white;color:#14243b;border:1px solid #c5d0df;border-radius:6px;padding:10px;font:inherit;max-width:100%}.ax button,.ax-btn{background:#1858b8;color:white;border:0;border-radius:6px;padding:10px 15px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}.ax-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}.ax-actions{display:flex;gap:12px;flex-wrap:wrap}.ax-actions a{background:#e7effb;color:#1458bd;border-radius:8px;padding:18px;flex:1;min-width:130px;text-decoration:none;text-align:center}.ax dialog{margin:auto;background:white;color:#14243b;border:1px solid #d9e1eb;border-radius:12px;padding:24px;width:min(480px,90vw)}.ax dialog::backdrop{background:#10243f88}.dashboard-app-shell--admin .dashboard-sidebar,.dashboard-app-shell--admin .dashboard-sidebar__brand,.dashboard-app-shell--admin .dashboard-sidebar__bottom{background:#10243f;color:white}.dashboard-app-shell--admin .dashboard-sidebar__link{color:white}.dashboard-app-shell--admin .dashboard-sidebar__link.is-active{background:#2058a5}@media(max-width:900px){.ax-grid{grid-template-columns:1fr}.ax-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+`}</style><header><h1>{titles[view]||'Administrator Dashboard'}</h1><p>{view?'University administration workspace.':'Manage academic records, staff and student services.'}</p></header><Workspace key={view+params.get('search')} view={view} search={params.get('search')||''}/></div>}
+function Workspace({view,search}){const [q,setQ]=useState(search);const [faculty,setFaculty]=useState('');const [profile,setProfile]=useState(null);const modal=useRef(null);useEffect(()=>{if(profile)modal.current?.showModal()},[profile]);const list=students.filter(s=>(!faculty||s.faculty===faculty)&&[s.name,s.studentNumber,s.programme,s.email].join(' ').toLowerCase().includes(q.toLowerCase()));const counts=FACULTIES.map(f=>[f.code,f.name,students.filter(s=>s.faculty===f.code).length,LECTURERS.filter(s=>s.faculty===f.code).length]);const exportStudents=()=>csv([['Matric','Name','Faculty','Programme','Year','Status'],...list.map(s=>[s.studentNumber,s.name,s.faculty,s.programme,s.year,s.status])]);const facultyTable=<Table headers={['Code','Faculty','Students','Lecturers']} rows={counts}/>;const studentTable=<Table headers={['Matric','Name','Faculty','Programme','Status','Action']} rows={list.map(s=>[s.studentNumber,s.name,s.faculty,s.programme,s.status,<button onClick={()=>setProfile(s)}>View profile</button>])}/>;const profileDialog=profile&&<dialog ref={modal} onClose={()=>setProfile(null)}><h2>{profile.name}</h2>{Object.entries(profile).filter(([k])=>k!=='id'&&k!=='name').map(([k,v])=><p key={k}><strong>{k}: </strong>{v}</p>)}<button onClick={()=>modal.current.close()}>Close</button></dialog>;
+if(!view&&!search)return <><div className="ax-stats">{[['Students',students.length,GraduationCap,'students'],['Lecturers',LECTURERS.length,UsersRound,'staff'],['Faculties',FACULTIES.length,BookOpen,'academics'],['Administrators',1,ShieldCheck,'access']].map(([label,value,Icon,v])=><Link key={v} className="ax-stat" to={link(v)}><Icon size={26}/><span>{label}<b>{value}</b></span></Link>)}</div><Card title="Quick Actions"><div className="ax-actions"><Link to={link('students')}>Manage Students</Link><Link to={link('staff')}>Manage Staff</Link><Link to={link('academics')}>Academic Structure</Link><Link to="/requests">Review Service Requests</Link><Link to={link('reports')}>Generate Reports</Link></div></Card><Card title="Faculty Overview">{facultyTable}</Card><div className="ax-grid"><Card title="Service Requests"><p>Review submitted requests and approvals in the existing request manager.</p><Link className="ax-btn" to="/requests">Open request manager</Link></Card><Card title="System Overview"><p>Demo academic directory: {students.length} students and {staff.length} staff accounts.</p><p>Live fee totals and activity logs are not connected.</p><Link to={link('access')}>Review role permissions</Link></Card></div></>;
+if(view==='students'||(!view&&search))return <Card title={'Student Directory ('+list.length+')'}><div className="ax-controls"><input aria-label="Search students" placeholder="Search students" value={q} onChange={e=>setQ(e.target.value)}/><select aria-label="Faculty" value={faculty} onChange={e=>setFaculty(e.target.value)}><option value="">All faculties</option>{FACULTIES.map(f=><option key={f.code}>{f.code}</option>)}</select><button onClick={exportStudents}>Export CSV</button></div>{studentTable}{profileDialog}</Card>;
+if(view==='staff')return <Card title="Staff Directory"><Table headers={['Name','Role','Faculty','Email']} rows={staff.map(s=>[s.displayName,s.role,s.faculty||'University-wide',s.email])}/><p>One lecturer per faculty. Accounts are demonstration records.</p></Card>;
+if(view==='academics')return <Card title="Faculties">{facultyTable}</Card>;
+if(view==='courses')return <Card title="Teaching Allocation"><Table headers={['Faculty','Lecturer','Students']} rows={LECTURERS.map(s=>[s.faculty,s.displayName,students.filter(x=>x.faculty===s.faculty).length])}/><p>Central course and timetable editing is not connected.</p></Card>;
+if(view==='access')return <Card title="Role Permissions"><Table headers={['Role','Workspace','Scope']} rows={ [['Student','Student services','Own record'],['Lecturer','Teaching','Assigned faculty'],['Administrator','Administration','University directory and requests']]}/><p>Demo access is client-side; production authorization is not configured.</p></Card>;
+if(view==='reports')return <><Card title="Faculty Enrollment">{facultyTable}<button onClick={exportStudents}>Export student directory</button></Card><Card title="Enrollment Distribution">{counts.map(([code,name,n])=><div key={code} style={{marginBottom:12}}><p>{code} · {n} students</p><div style={{background:'#e7effb',height:12,borderRadius:6}}><div style={{background:'#1858b8',height:12,borderRadius:6,width:(n/students.length*100)+'%'}}/></div></div>)}</Card></>;
+if(view==='fees')return <Card title="Fee Enquiries"><p>No verified fee ledger is connected. Review fee-related service requests in the request manager.</p><Link className="ax-btn" to="/requests">Open requests</Link></Card>;
+return <Card title="System Configuration"><Table headers={['Setting','Value']} rows={ [['Authentication','Demo'],['Faculties',FACULTIES.length],['Lecturer accounts',LECTURERS.length]]}/><p>Production configuration editing is not connected.</p></Card>}
