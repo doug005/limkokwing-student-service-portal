@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { DEMO_ACCOUNTS, LECTURERS } from '../data/accounts.js';
-import { getDirectory } from './directoryStore.js';
+import { readPortalProfile } from './directoryStore.js';
+import { auth, db, requireFirebase } from './firebase.js';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 export { DEMO_ACCOUNTS, LECTURERS };
 
@@ -32,93 +35,47 @@ export function getDashboardPath(role) {
   return `/dashboard/${role}`;
 }
 
-export function getSession() {
-  if (typeof window === 'undefined') return null;
-  try {
-    const stored = window.localStorage.getItem(ROLE_SESSION_KEY);
-    const session = stored ? JSON.parse(stored) : null;
-    if (!session || !ROLE_DEFINITIONS[session.role]) return null;
-    return session;
-  } catch {
-    return null;
-  }
-}
 
-function notifyRoleChange() {
-  if (typeof window !== 'undefined') window.dispatchEvent(new Event(ROLE_CHANGE_EVENT));
-}
-
-function saveSession(session) {
-  window.localStorage.setItem(ROLE_SESSION_KEY, JSON.stringify(session));
-  notifyRoleChange();
-  return session;
-}
-
-function authError(message) {
-  const error = new Error(message);
-  error.code = 'demo-auth/invalid-credential';
-  return error;
-}
-
-export function signInDemo({ role, identifier, password }) {
-  const normalizedRole = String(role || '').toLowerCase();
-  const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
-  const suppliedPassword = String(password || '');
-  if (!ROLE_DEFINITIONS[normalizedRole]) throw authError('Choose a valid portal role before signing in.');
-  if (!normalizedIdentifier || !suppliedPassword) throw authError('Enter your username and password to continue.');
-  const account = getDirectory().find((person) => person.role === normalizedRole
-    && [person.identifier, person.email, person.studentNumber].some((value) => String(value || '').toLowerCase() === normalizedIdentifier));
-  if (!account || account.password !== suppliedPassword) throw authError('Those credentials were not recognised. Check your username and password, then try again.');
-  if (account.status !== 'Active') throw authError('This account is suspended. Contact a portal administrator.');
-  return saveDirectorySession(account);
-}
-
-export function signInWithCredentials({ identifier, password }) {
-  const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
-  const suppliedPassword = String(password || '');
-
-  if (!normalizedIdentifier || !suppliedPassword) {
-    throw authError('Enter your username and password to continue.');
-  }
-
-  const account = getDirectory().find((person) => [person.identifier, person.email, person.studentNumber]
-    .some((value) => String(value || '').toLowerCase() === normalizedIdentifier));
-  if (account && account.password === suppliedPassword && account.status === 'Active') return saveDirectorySession(account);
-  if (account && account.status !== 'Active') throw authError('This account is suspended. Contact a portal administrator.');
-  throw authError('Those credentials were not recognised. Check your username and password, then try again.');
-}
-
-function saveDirectorySession(account) {
-  return saveSession({
-    id: account.id,
-    role: account.role,
-    name: account.name || account.displayName,
-    email: account.email,
-    studentId: account.studentNumber,
-    faculty: account.faculty,
-    programme: account.programme,
-    signedInAt: new Date().toISOString(),
+let session=null;
+const listeners=new Set();
+let generation=0, stopProfile=()=>{};
+function publish(value){session=value;for(const listener of listeners)listener(value);}
+function toSession(profile){return profile?{id:profile.id,role:profile.role,name:profile.name||profile.displayName,email:profile.email,studentId:profile.studentNumber,faculty:profile.faculty,programme:profile.programme}:null;}
+export function getSession(){return session;}
+if(typeof window!=='undefined'){
+  // Legacy browser credentials are not trusted or migrated.
+  try{window.localStorage.removeItem(ROLE_SESSION_KEY);}catch{}
+  if(auth)onAuthStateChanged(auth,async user=>{
+    const token=++generation;stopProfile();publish(null);
+    if(!user)return;
+    try{
+      const profile=await readPortalProfile(user);
+      if(token!==generation)return;
+      if(!profile){await signOut(auth);return;}
+      publish(toSession(profile));
+      if(!profile.bootstrap)stopProfile=onSnapshot(doc(db,'portalDirectory',user.uid),snap=>{
+        if(token!==generation)return;
+        if(!snap.exists()||snap.data().status!=='Active'){publish(null);signOut(auth).catch(()=>{});return;}
+        publish(toSession({...snap.data(),id:user.uid}));
+      },()=>{publish(null);signOut(auth).catch(()=>{});});
+    }catch{if(token===generation){publish(null);await signOut(auth).catch(()=>{});}}
   });
 }
-
-export function signOutDemo() {
-  if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(ROLE_SESSION_KEY);
-  notifyRoleChange();
+export async function signInWithCredentials({identifier,password}){
+  const {auth:firebaseAuth}=requireFirebase();
+  const email=String(identifier||'').trim().toLowerCase();
+  if(!email.includes('@'))throw new Error('Sign in with your assigned email address.');
+  const credential=await signInWithEmailAndPassword(firebaseAuth,email,password);
+  try{
+    const profile=await readPortalProfile(credential.user);
+    if(!profile)throw new Error('No active portal account is assigned to this email.');
+    const next=toSession(profile);publish(next);return next;
+  }catch(error){await signOut(firebaseAuth);throw error;}
 }
-
-export function useRoleSession() {
-  const [session, setSession] = useState(() => getSession());
-
-  useEffect(() => {
-    const syncSession = () => setSession(getSession());
-    window.addEventListener(ROLE_CHANGE_EVENT, syncSession);
-    window.addEventListener('storage', syncSession);
-    return () => {
-      window.removeEventListener(ROLE_CHANGE_EVENT, syncSession);
-      window.removeEventListener('storage', syncSession);
-    };
-  }, []);
-
-  return session;
+export async function signInDemo(input){return signInWithCredentials(input);}
+export function signOutDemo(){publish(null);if(auth)signOut(auth).catch(()=>{});}
+export function useRoleSession(){
+  const [value,setValue]=useState(getSession);
+  useEffect(()=>{listeners.add(setValue);setValue(getSession());return()=>listeners.delete(setValue);},[]);
+  return value;
 }
