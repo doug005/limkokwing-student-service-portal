@@ -17,16 +17,24 @@ service cloud.firestore {
       let data = request.resource.data;
       return data.keys().hasAll([
           'studentName', 'studentId', 'email', 'serviceId', 'serviceName',
-          'description', 'requestDate', 'status', 'createdAt'
+          'description', 'requestDate', 'status', 'createdAt', 'ownerUid', 'fee', 'payment'
         ])
         && data.keys().hasOnly([
           'studentName', 'studentId', 'email', 'serviceId', 'serviceName',
-          'description', 'requestDate', 'status', 'createdAt'
+          'description', 'requestDate', 'status', 'createdAt', 'ownerUid', 'fee', 'payment'
         ])
+        && activeStudent()
+        && data.ownerUid == request.auth.uid
+        && data.studentId == studentProfile().studentNumber
+        && data.email == studentProfile().email
+        && data.studentName == studentProfile().name
+        && data.payment is map && data.payment.keys().hasOnly(['status'])
+        && ((data.serviceId == 'student-id-replacement' && data.fee == 450 && data.payment.status == 'Awaiting payment')
+          || (data.serviceId != 'student-id-replacement' && data.fee == 0 && data.payment.status == 'Not required'))
         && data.studentName is string
         && data.studentName.size() >= 3
         && !data.studentName.matches('^\\s*$')
-        && data.studentName.size() <= 35
+        && data.studentName.size() <= 80
         && !data.studentName.matches('.*[0-9].*')
         && data.studentId is string
         && data.studentId.matches('^90101[0-9]{4}$')
@@ -59,14 +67,53 @@ service cloud.firestore {
         && data.createdAt == request.time;
     }
 
+    function studentProfile() {
+      return get(/databases/$(database)/documents/portalDirectory/$(request.auth.uid)).data;
+    }
+    function activeStudent() {
+      return signedIn() && exists(/databases/$(database)/documents/portalDirectory/$(request.auth.uid))
+        && studentProfile().role == 'student' && studentProfile().status == 'Active';
+    }
+    function ownsRequest() {
+      return activeStudent() && resource.data.ownerUid == request.auth.uid;
+    }
+    function pricedCard() {
+      return resource.data.serviceId == 'student-id-replacement' && resource.data.get('fee',0) == 450;
+    }
+    function validProof() {
+      let p = request.resource.data.payment;
+      return p is map && p.keys().hasAll(['status','reference','proofName','proofType','proofData','submittedAt'])
+        && p.keys().hasOnly(['status','reference','proofName','proofType','proofData','submittedAt'])
+        && p.status == 'Pending verification'
+        && p.reference is string && p.reference.size() >= 3 && p.reference.size() <= 100
+        && p.proofName is string && p.proofName.size() > 0 && p.proofName.size() <= 120
+        && p.proofType in ['application/pdf','image/jpeg','image/png','image/webp']
+        && p.proofData is string && p.proofData.size() > 0 && p.proofData.size() <= 546136
+        && p.submittedAt == request.time;
+    }
+    function validPaymentReview(requestId) {
+      let p = request.resource.data.payment;
+      return pricedCard() && resource.data.status != 'Rejected'
+        && resource.data.payment.status == 'Pending verification'
+        && p.diff(resource.data.payment).affectedKeys().hasOnly(['status','reviewedAt','reviewedBy','receiptNumber','rejectionReason'])
+        && p.reviewedAt == request.time && p.reviewedBy == request.auth.uid
+        && ((p.status == 'Verified' && p.receiptNumber == 'LIM-' + requestId && !p.keys().hasAny(['rejectionReason']))
+          || (p.status == 'Payment rejected' && p.rejectionReason is string && p.rejectionReason.size() >= 3
+            && p.rejectionReason.size() <= 300 && !p.keys().hasAny(['receiptNumber'])));
+    }
     match /studentRequests/{requestId} {
-      // Students may create only a schema-validated request; they cannot list or read student data.
       allow create: if validStudentRequest();
-      allow get, list: if isRequestManager();
-      allow update: if isRequestManager()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
-        && request.resource.data.status in ['Pending', 'In Progress', 'Completed', 'Rejected'];
-      allow delete: if isRequestManager();
+      allow get, list: if isRequestManager() || ownsRequest();
+      allow update: if (ownsRequest() && pricedCard() && resource.data.status != 'Rejected'
+          && resource.data.payment.status in ['Awaiting payment','Payment rejected']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['payment']) && validProof())
+        || (isRequestManager() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['payment'])
+          && validPaymentReview(requestId))
+        || (isRequestManager() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status in ['Pending','In Progress','Completed','Rejected']
+          && (!pricedCard() || resource.data.payment.status == 'Verified' && request.resource.data.status != 'Rejected'
+            || resource.data.payment.status in ['Awaiting payment','Payment rejected'] && request.resource.data.status in ['Pending','Rejected']));
+      allow delete: if isRequestManager() && (!pricedCard() || resource.data.payment.status == 'Awaiting payment');
     }
 
     function validDirectoryProfile() {
