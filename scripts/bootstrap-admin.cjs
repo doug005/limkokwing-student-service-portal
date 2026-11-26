@@ -1,13 +1,29 @@
 // Run locally from an already authenticated Firebase CLI session.
 const { execFileSync } = require('node:child_process');
-const { readFileSync } = require('node:fs');
+const { readFileSync, realpathSync, existsSync } = require('node:fs');
 const path = require('node:path');
 const project = 'limkokwing-student-services';
 const email = 'admin@limkokwing.ac.ls';
 async function main() {
   const password = readFileSync(0,'utf8').replace(/\r?\n$/, '');
   if (password.length < 12 || password.length > 128 || password === 'admin123') throw new Error('Choose a new password of 12–128 characters.');
-  const cli = path.join(execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim(),'firebase-tools','lib');
+  const executable = execFileSync('which',['firebase'],{encoding:'utf8'}).trim();
+  const resolved = realpathSync(executable);
+  let folder = path.dirname(resolved);
+  let cli;
+  while (folder !== path.dirname(folder)) {
+    const candidate = path.join(folder,'lib','auth.js');
+    if (existsSync(candidate) && existsSync(path.join(folder,'package.json'))) {
+      const pkg = JSON.parse(readFileSync(path.join(folder,'package.json'),'utf8'));
+      if (pkg.name === 'firebase-tools') { cli = path.join(folder,'lib'); break; }
+    }
+    folder = path.dirname(folder);
+  }
+  if (!cli) {
+    const candidates = ['/usr/local/lib/node_modules','/usr/lib/node_modules',execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim()];
+    cli = candidates.map(dir=>path.join(dir,'firebase-tools','lib')).find(dir=>existsSync(path.join(dir,'auth.js')));
+  }
+  if (!cli) throw new Error('Cannot locate the Firebase CLI npm package from '+resolved+'. Install firebase-tools with npm.');
   const { getGlobalDefaultAccount, getAccessToken } = require(path.join(cli,'auth.js'));
   const account = getGlobalDefaultAccount();
   if (!account?.tokens?.refresh_token) throw new Error('Run firebase login on this computer first.');
