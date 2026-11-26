@@ -1830,3 +1830,17 @@ body{background:#0d0d0d;color:#f5f5f5;font-family:Arial,sans-serif}
 .dashboard-app-shell svg,.login-gateway svg{color:#ddd!important}
 .dashboard-app-shell :is(button,a):hover{color:white!important}
 .login-gateway__card,.login-gateway__demo,.login-gateway__input-wrap{background:#1c1c1c!important;color:#f5f5f5!important;border-color:#444!important}
+
+/* Contrast follows the actual surface, not the global theme. */
+.dashboard-app-shell.dashboard-app-shell [data-portal-light="true"],
+.login-gateway.login-gateway [data-portal-light="true"]{color:#111!important}
+.dashboard-app-shell.dashboard-app-shell [data-portal-light="true"]:is(small,p,caption),
+.login-gateway.login-gateway [data-portal-light="true"]:is(small,p,caption){color:#333!important}
+.dashboard-app-shell.dashboard-app-shell [data-portal-light="true"]:is(input,textarea)::placeholder,
+.login-gateway.login-gateway [data-portal-light="true"]:is(input,textarea)::placeholder{color:#555!important;opacity:1}
+.dashboard-app-shell.dashboard-app-shell [data-portal-light="true"]:is(input,select,textarea),
+.login-gateway.login-gateway [data-portal-light="true"]:is(input,select,textarea){color-scheme:light}
+.dashboard-app-shell.dashboard-app-shell [data-portal-light="true"]:focus-visible,
+.login-gateway.login-gateway [data-portal-light="true"]:focus-visible{outline-color:#111}
+.dashboard-app-shell.dashboard-app-shell [data-portal-light="true"] > svg,
+.login-gateway.login-gateway [data-portal-light="true"] > svg{color:#111!important}
