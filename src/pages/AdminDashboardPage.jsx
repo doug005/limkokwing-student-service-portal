@@ -151,7 +151,7 @@ function Workspace({ view, search }) {
     {notice}
     <Card title="Quick Actions"><div className="ax-actions"><Link to={link('students')}>Manage Students</Link><Link to={link('staff')}>Manage Lecturers & Admins</Link><Link to={link('academics')}>Academic Structure</Link><Link to="/requests">Review Service Requests</Link><Link to={link('reports')}>Generate Reports</Link></div></Card>
     <Card title="Faculty Overview">{facultyTable}</Card>
-    <div className="ax-grid"><Card title="Service Requests"><p>Review submitted requests in the existing Firebase request manager.</p><Link className="ax-btn" to="/requests">Open request manager</Link></Card><Card title="System Overview"><p>{students.length} student records, {lecturers.length} lecturers, and {admins.length} administrators in the Firebase directory.</p><p>Live fees and activity logs are not connected.</p><Link to={link('access')}>Review role permissions</Link></Card></div>
+    <div className="ax-grid"><Card title="Service Requests"><p>Review submitted requests in the existing Firebase request manager.</p><Link className="ax-btn" to="/requests">Open request manager</Link></Card><Card title="System Overview"><p>{students.length} student records, {lecturers.length} lecturers, and {admins.length} administrators in the Firebase directory.</p><p>Card payments and receipts are available under Fee Management.</p><Link to={link('access')}>Review role permissions</Link></Card></div>
   </>;
 
   if (view === 'students' || (!view && search)) return <>
@@ -176,7 +176,7 @@ function Workspace({ view, search }) {
     { key: 'admin', cells: ['Administrator', 'Administration', 'Directory and service requests'] },
   ]} /></Card></>;
   if (view === 'reports') return <><Card title="Faculty Enrollment">{facultyTable}<button type="button" onClick={() => exportCsv('faculty-enrollment.csv', [['Faculty', 'Students', 'Lecturers'], ...counts.map(([code, , studentCount, lecturerCount]) => [code, studentCount, lecturerCount])])}>Export enrollment</button></Card><Card title="Enrollment Distribution">{counts.map(([code, name, count]) => <div key={code} style={{ marginBottom: 12 }}><p>{code} · {name} · {count} students</p><div style={{ background: '#e7effb', height: 12, borderRadius: 6 }}><div style={{ background: '#1858b8', height: 12, borderRadius: 6, width: `${students.length ? (count / students.length) * 100 : 0}%` }} /></div></div>)}</Card></>;
-  if (view === 'fees') return <Card title="Fee Enquiries"><p>No verified fee ledger is connected. Review fee-related service requests in the request manager.</p><Link className="ax-btn" to="/requests">Open requests</Link></Card>;
+  if (view === 'fees') return <Card title="Service Payments"><p>Verify student card payments of M450.00 and issue receipts.</p><Link className="ax-btn" to="/payments">Open payment verification</Link></Card>;
   return <Card title="System Configuration"><Table headers={['Setting', 'Value']} rows={[
     { key: 'auth', cells: ['Authentication', 'Firebase Authentication'] },
     { key: 'directory', cells: ['Directory storage', 'Cloud Firestore'] },
