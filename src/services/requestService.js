@@ -90,7 +90,9 @@ export async function signOutRequestManager() {
 export async function hasRequestManagerAccess(userId) {
   const { db: firestore } = requireFirebase();
   const roleDocument = await getDoc(doc(firestore, 'admins', userId));
-  return roleDocument.exists();
+  if (roleDocument.exists()) return true;
+  const profile = await getDoc(doc(firestore, 'portalDirectory', userId));
+  return profile.exists() && profile.data().role === 'admin' && profile.data().status === 'Active';
 }
 
 export function currentFirebaseUser() {
