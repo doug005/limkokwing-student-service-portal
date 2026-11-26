@@ -68,3 +68,10 @@
 ## 9. Reference-inspired academic workspace presentation — In progress
 - Use the supplied dashboard and login pictures as inspiration for a full-height dark academic workspace, persistent role-specific sidebar, compact top utility bar, four-tone metric cards, quick actions, and a campus-image split login composition.
 - Preserve Limkokwing branding, the existing six-service content, accessible responsive behavior, and the browser-local demo-auth disclosure rather than copying the reference product identity or claiming production security.
+
+## 10. Admin directory CRUD for students and staff — Complete (browser-local demo only)
+- In the Administrator dashboard, allow an admin to add, view/search/filter, update, and delete student records, lecturer records, and additional administrator records.
+- Student records must include a unique 9-digit student number beginning with `90101`, name, email, faculty, programme, year, status, and demo sign-in password; lecturer records must include name, unique email, faculty, status, and demo sign-in password; administrator records must include name, unique email, status, and demo sign-in password.
+- Provide edit forms with the existing values, validate required fields and duplicate student numbers/emails, and ask for confirmation before deletion.
+- Changes must persist across reloads in the current browser and be reflected in the related directory views and demo sign-in; prevent deleting or demoting the signed-in administrator and prevent removal of the final administrator.
+- Clearly disclose that this directory and its credentials are browser-local demo data, not shared Firebase records, real account provisioning, or production-grade authentication. Do not weaken the existing Firestore request security rules.

@@ -82,3 +82,7 @@ src/
 └── services/
     └── roleAuth.js              # Demo role accounts and local session helpers
 ```
+
+## Admin directory CRUD extension
+
+Reuse the existing React/webpack portal, admin routes, dashboard visual language, and demo authentication model. Add a shared `src/services/directoryStore.js` to seed the existing student and staff fixtures, read/write managed directory records in browser `localStorage`, validate unique identifiers, and notify dashboard views when records change. Extract the seeded demo account definitions to `src/data/accounts.js` so authentication and the directory store share one source without circular imports. Extend the Admin dashboard's Students and Staff workspaces with create, edit, search, and confirmed-delete interactions; the Staff workspace manages both lecturers and administrators. Keep directory changes visible to demo sign-in and student/lecturer directory views. The browser-local store is only a same-browser demonstration and must be labelled as such; do not claim Firebase-backed user provisioning, shared persistence, or production access control. Do not change Firestore request management or its restrictive security rules.

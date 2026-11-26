@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Copy, FileText, GraduationCap, Grid2X2, Library, Megaphone, QrCode, Receipt, UserRound, Wallet } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getFacultyByCode, getStudentByNumber } from '../data/students.js';
+import { getFacultyByCode } from '../data/students.js';
+import { useDirectory } from '../services/directoryStore.js';
 import { useRoleSession } from '../services/roleAuth.js';
 
 const quickActions = [
@@ -30,10 +31,11 @@ const recentRequests = [
 
 export default function StudentDashboardPage() {
   const session = useRoleSession();
+  const directory = useDirectory();
   const [searchParams] = useSearchParams();
   const view = searchParams.get('view') || '';
   const [attendanceCheckedIn, setAttendanceCheckedIn] = useState(false);
-  const student = getStudentByNumber(session?.studentId);
+  const student = directory.find((person) => person.role === 'student' && (person.id === session?.id || person.studentNumber === session?.studentId));
   const faculty = getFacultyByCode(student?.faculty);
   const [copied, setCopied] = useState(false);
 

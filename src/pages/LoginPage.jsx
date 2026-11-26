@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { BarChart3, BookOpen, Eye, EyeOff, GraduationCap, KeyRound, LockKeyhole, LogIn, Mail, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import FormField from '../components/FormField.jsx';
-import { DEMO_ACCOUNTS, getDashboardPath, signInWithCredentials } from '../services/roleAuth.js';
+import { useDirectory } from '../services/directoryStore.js';
+import { getDashboardPath, signInWithCredentials } from '../services/roleAuth.js';
 
 const ACCESS_FEATURES = [
   { icon: GraduationCap, label: 'Student portal' },
@@ -12,6 +13,8 @@ const ACCESS_FEATURES = [
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const directory = useDirectory();
+  const demoStudent = directory.find((person) => person.role === 'student' && person.status === 'Active') || directory.find((person) => person.role === 'student');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -74,8 +77,8 @@ export default function LoginPage() {
         </form>
         <div className="login-gateway__demo">
           <div><KeyRound size={15} /><strong>Demo access</strong></div>
-          <p>Student: <code>{DEMO_ACCOUNTS.student.identifier}</code> / <code>{DEMO_ACCOUNTS.student.password}</code></p>
-          <p>Lecturer or admin: use the staff demo credentials supplied in the project README.</p>
+          {demoStudent ? <p>Student: <code>{demoStudent.identifier}</code> / <code>{demoStudent.password}</code></p> : <p>No student demo account is available. Ask a portal administrator to add one.</p>}
+          <p>Lecturer or admin: use the staff demo credentials supplied in the project README. Admin-managed demo accounts also sign in here with their assigned email or student number.</p>
         </div>
         <p className="login-gateway__note">This preview uses browser-local demo authentication. Replace it with Firebase Authentication and server-enforced roles before using real credentials.</p>
       </section>

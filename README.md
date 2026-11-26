@@ -14,6 +14,7 @@ The frontend is React, built with webpack and served by a Node.js/Express applic
 - Firestore create/read/update/delete operations for `studentRequests`.
 - Staff request management with live updates, status counts, search, details, status changes, and confirmed deletion.
 - Login-only entry gateway with the Limkokwing campus hero background; credentials infer Student, Lecturer, or Administrator access and open the matching dashboard.
+- Admin directory management: add, search, edit, and delete student, lecturer, and administrator demo records; changes appear in the student/lecturer directory and can be used for demo sign-in.
 - Twenty seeded students distributed across FICT, FCMB, FBMG, and FCTH; every student number begins with `90101` and ends with four randomised digits.
 - Responsive navigation, accessible field errors, and loading, empty, and failure states.
 - Firestore rules that allow validated student request creation while restricting reads, updates, and deletes to approved staff.
@@ -33,10 +34,10 @@ JavaScript, Node.js 20+, React 18, React Router DOM, Express 5, webpack, Firebas
 │   └── dev.mjs               # Watches client source and starts Node.js server
 ├── src/
 │   ├── components/           # Shared buttons, cards, fields, status, navigation, footer, route guards
-│   ├── data/                 # Six services and 20 seeded student records
+│   ├── data/                 # Six services, 20 seeded students, and shared demo accounts
 │   ├── layouts/              # Shared routed shell
 │   ├── pages/                # Public pages, login, role dashboards, request management
-│   ├── services/             # Firebase setup, Firestore operations, and demo role sessions
+│   ├── services/             # Firebase/Firestore, browser-local directory CRUD, and demo role sessions
 │   ├── styles/               # Responsive design tokens and application CSS
 │   ├── utils/                # Date formatting helpers
 │   ├── App.jsx                # React Router route tree
@@ -124,6 +125,12 @@ The entire site is gated by `/login`: unauthenticated visitors see only the full
 | Administrator | `admin@limkokwing.ac.ls` | `admin123` | `/dashboard/admin` |
 
 Any seeded student number can be used with `student123` to preview that student's record. The browser-local session is intentionally a presentation/demo mechanism and is not a production security boundary. Before handling real credentials or student data, replace `src/services/roleAuth.js` with Firebase Authentication, enforce roles with server-side claims or Firestore rules, and remove the demo passwords from the client bundle.
+
+### Admin directory CRUD (demo only)
+
+From `/dashboard/admin`, open **Students** to add, search/filter, edit, export, or delete student records. Open **Staff** to manage lecturers and administrators. Student numbers must contain exactly nine digits and begin with `90101`; email addresses and student numbers must be unique. Lecturer records require a faculty; administrator records are university-wide. New and updated accounts may be suspended, and suspended accounts cannot sign in. The app prevents deletion/demotion of the currently signed-in administrator and prevents removing the final active administrator.
+
+Directory records—including demo passwords—are stored in the current browser's `localStorage` under `limkokwing-portal-directory-v1`. They persist across reloads in that browser, but are not shared with other browsers, synced to Firestore, or provisioned in Firebase Authentication. Treat this feature as a local demonstration only; never use these plaintext browser-local credentials or role controls for real accounts or protected student data. Existing Firebase-backed service-request management and its restrictive Firestore rules are unchanged.
 
 The student request form uses the same required number format as the seeded directory: the first five digits are `90101`, followed by four digits. For example, the first demo student is `901014827`.
 

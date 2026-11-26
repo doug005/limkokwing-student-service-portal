@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getStudentByNumber, students } from '../data/students.js';
+import { DEMO_ACCOUNTS, LECTURERS } from '../data/accounts.js';
+import { getDirectory } from './directoryStore.js';
+
+export { DEMO_ACCOUNTS, LECTURERS };
 
 export const ROLE_SESSION_KEY = 'limkokwing-portal-role-session';
 export const ROLE_CHANGE_EVENT = 'limkokwing-role-change';
@@ -25,34 +28,6 @@ export const ROLE_DEFINITIONS = {
   },
 };
 
-export const DEMO_ACCOUNTS = {
-  student: {
-    role: 'student',
-    identifier: students[0].studentNumber,
-    password: 'student123',
-    displayName: students[0].name,
-    email: students[0].email,
-    hint: `${students[0].studentNumber} / student123`,
-  },
-  lecturer: {
-    role: 'lecturer',
-    identifier: 'lecturer@limkokwing.ac.ls',
-    password: 'lecturer123',
-    displayName: 'Dr. Naledi Ralefala',
-    email: 'lecturer@limkokwing.ac.ls',
-    hint: 'lecturer@limkokwing.ac.ls / lecturer123',
-  },
-  admin: {
-    role: 'admin',
-    identifier: 'admin@limkokwing.ac.ls',
-    password: 'admin123',
-    displayName: 'Portal Administrator',
-    email: 'admin@limkokwing.ac.ls',
-    hint: 'admin@limkokwing.ac.ls / admin123',
-  },
-};
-
-export const LECTURERS = ['FICT','FCMB','FBMG','FCTH'].flatMap((faculty)=>Array.from({length:1},(_,i)=>({role:'lecturer',faculty,index:i,identifier:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',email:faculty==='FICT'&&i===0?'lecturer@limkokwing.ac.ls':faculty.toLowerCase()+(i+1)+'@limkokwing.ac.ls',displayName:faculty==='FICT'&&i===0?'Dr. Naledi Ralefala':faculty+' Lecturer '+(i+1),password:'lecturer123'})));
 export function getDashboardPath(role) {
   return `/dashboard/${role}`;
 }
@@ -89,36 +64,13 @@ export function signInDemo({ role, identifier, password }) {
   const normalizedRole = String(role || '').toLowerCase();
   const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
   const suppliedPassword = String(password || '');
-  const account = normalizedRole==='lecturer'?LECTURERS.find(a=>a.identifier===normalizedIdentifier):DEMO_ACCOUNTS[normalizedRole];
-
-  if (!account) throw authError('Choose a valid portal role before signing in.');
+  if (!ROLE_DEFINITIONS[normalizedRole]) throw authError('Choose a valid portal role before signing in.');
   if (!normalizedIdentifier || !suppliedPassword) throw authError('Enter your username and password to continue.');
-  if (suppliedPassword !== account.password) throw authError('The password was not recognised. Use the demo password shown for this role.');
-
-  if (normalizedRole === 'student') {
-    const student = getStudentByNumber(normalizedIdentifier) || students.find((item) => item.email.toLowerCase() === normalizedIdentifier);
-    if (!student) throw authError('Enter one of the seeded student numbers or the student email shown on this page.');
-    return saveSession({
-      role: normalizedRole,
-      name: student.name,
-      email: student.email,
-      studentId: student.studentNumber,
-      faculty: student.faculty,
-      programme: student.programme,
-      signedInAt: new Date().toISOString(),
-    });
-  }
-
-  if (normalizedIdentifier !== account.identifier.toLowerCase()) {
-    throw authError(`Use the ${ROLE_DEFINITIONS[normalizedRole].label.toLowerCase()} demo username shown on this page.`);
-  }
-
-  return saveSession({
-    role: normalizedRole,
-    name: account.displayName,
-    email: account.email,
-    signedInAt: new Date().toISOString(),
-  });
+  const account = getDirectory().find((person) => person.role === normalizedRole
+    && [person.identifier, person.email, person.studentNumber].some((value) => String(value || '').toLowerCase() === normalizedIdentifier));
+  if (!account || account.password !== suppliedPassword) throw authError('Those credentials were not recognised. Check your username and password, then try again.');
+  if (account.status !== 'Active') throw authError('This account is suspended. Contact a portal administrator.');
+  return saveDirectorySession(account);
 }
 
 export function signInWithCredentials({ identifier, password }) {
@@ -129,37 +81,24 @@ export function signInWithCredentials({ identifier, password }) {
     throw authError('Enter your username and password to continue.');
   }
 
-  const student = getStudentByNumber(normalizedIdentifier)
-    || students.find((item) => item.email.toLowerCase() === normalizedIdentifier);
-
-  if (student && suppliedPassword === DEMO_ACCOUNTS.student.password) {
-    return saveSession({
-      role: 'student',
-      name: student.name,
-      email: student.email,
-      studentId: student.studentNumber,
-      faculty: student.faculty,
-      programme: student.programme,
-      signedInAt: new Date().toISOString(),
-    });
-  }
-
-  const staffAccount = [...LECTURERS,DEMO_ACCOUNTS.admin].find((account) => (
-    account.role !== 'student'
-    && account.identifier.toLowerCase() === normalizedIdentifier
-    && account.password === suppliedPassword
-  ));
-
-  if (staffAccount) {
-    return saveSession({
-      role: staffAccount.role,
-      name: staffAccount.displayName,
-      email: staffAccount.email,
-      signedInAt: new Date().toISOString(),
-    });
-  }
-
+  const account = getDirectory().find((person) => [person.identifier, person.email, person.studentNumber]
+    .some((value) => String(value || '').toLowerCase() === normalizedIdentifier));
+  if (account && account.password === suppliedPassword && account.status === 'Active') return saveDirectorySession(account);
+  if (account && account.status !== 'Active') throw authError('This account is suspended. Contact a portal administrator.');
   throw authError('Those credentials were not recognised. Check your username and password, then try again.');
+}
+
+function saveDirectorySession(account) {
+  return saveSession({
+    id: account.id,
+    role: account.role,
+    name: account.name || account.displayName,
+    email: account.email,
+    studentId: account.studentNumber,
+    faculty: account.faculty,
+    programme: account.programme,
+    signedInAt: new Date().toISOString(),
+  });
 }
 
 export function signOutDemo() {
