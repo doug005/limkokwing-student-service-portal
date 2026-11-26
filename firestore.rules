@@ -77,41 +77,16 @@ service cloud.firestore {
         && p.name is string && p.name.size() >= 3 && p.name.size() <= 80
         && p.displayName == p.name
         && p.email is string && p.email.size() <= 254
-        && p.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+
-      // A signed-in staff user may check their own administrator record only.
-      // Provision this record through a trusted Firebase Console/Admin SDK workflow.
-      allow get: if signedIn() && request.auth.uid == userId;
-      allow list: if false;
-      allow create, update, delete: if false;
-    }
-  }
-}
-)
+        && p.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
         && p.status in ['Active','Suspended']
-        && ((p.role == 'student' && p.studentNumber is string && p.studentNumber.matches('^90101[0-9]{4}
-      // A signed-in staff user may check their own administrator record only.
-      // Provision this record through a trusted Firebase Console/Admin SDK workflow.
-      allow get: if signedIn() && request.auth.uid == userId;
-      allow list: if false;
-      allow create, update, delete: if false;
-    }
-  }
-}
-)
+        && ((p.role == 'student' && p.studentNumber is string && p.studentNumber.matches('^90101[0-9]{4}$')
              && p.identifier == p.studentNumber && p.faculty in ['FICT','FCMB','FBMG','FCTH']
              && p.programme is string && p.programme.size() > 0 && p.programme.size() <= 120
-             && p.year.matches('^Year [1-8]
-      // A signed-in staff user may check their own administrator record only.
-      // Provision this record through a trusted Firebase Console/Admin SDK workflow.
-      allow get: if signedIn() && request.auth.uid == userId;
-      allow list: if false;
-      allow create, update, delete: if false;
-    }
-  }
-}
-))
-          || (p.role == 'lecturer' && p.identifier == p.email && p.faculty in ['FICT','FCMB','FBMG','FCTH'])
-          || (p.role == 'admin' && p.identifier == p.email));
+             && p.year is string && p.year.matches('^Year [1-8]$'))
+          || (p.role == 'lecturer' && p.identifier == p.email && p.faculty in ['FICT','FCMB','FBMG','FCTH']
+              && !p.keys().hasAny(['studentNumber','programme','year']))
+          || (p.role == 'admin' && p.identifier == p.email
+              && !p.keys().hasAny(['studentNumber','programme','year','faculty','index'])));
     }
     function lecturerCanRead() {
       return signedIn()
