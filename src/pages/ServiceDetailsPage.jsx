@@ -19,7 +19,7 @@ export default function ServiceDetailsPage() {
         <div className="detail-hero__copy">
           <p className="eyebrow">{service.category}</p>
           <h1>{service.name.split(' ').slice(0, -1).join(' ')}<br /><em>{service.name.split(' ').slice(-1)}</em></h1>
-          <p className="detail-hero__description">{service.description}</p>
+          <p className="detail-hero__description">{service.description}</p>{service.id==="student-id-replacement"&&<p><strong>Replacement fee: M450.00</strong></p>}
           <Button to={`/request?service=${service.id}`}>Continue to request <ArrowRight size={16} /></Button>
         </div>
         <div className="detail-hero__symbol">
