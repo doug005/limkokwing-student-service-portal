@@ -272,7 +272,7 @@ export default function RequestsPage() {
         eyebrow="Request management"
         title="Service Requests"
         description="A focused workspace for reviewing student requests, moving work forward, and keeping every record current."
-        action={user && authorized ? <button type="button" className="sign-out-button" onClick={handleSignOut}><LogOut size={15} /> Sign out</button> : null}
+        action={user && authorized ? <div style={{display:"flex",gap:8,flexWrap:"wrap"}}><Link className="button button--outline" to="/payments">Verify payments</Link><button type="button" className="sign-out-button" onClick={handleSignOut}><LogOut size={15} /> Sign out</button></div> : null}
       />
 
       {!isFirebaseConfigured ? (
@@ -329,8 +329,8 @@ export default function RequestsPage() {
                   <div className="request-queue__identity"><span className="request-queue__initials">{request.studentName.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span><div><strong>{request.studentName}</strong><small>{request.studentId} · {request.email}</small></div></div>
                   <div className="request-queue__service"><p className="eyebrow">{request.status === 'Pending' ? 'Needs review' : 'Student request'}</p><h3>{request.serviceName}</h3><span>ID {request.id.slice(0, 10)}</span></div>
                   <div className="request-queue__date"><span>Submitted</span><strong>{formatDate(request.createdAt)}</strong><small>Request date {formatDate(request.requestDate)}</small></div>
-                  <div className="request-queue__status"><StatusBadge status={request.status} /><label className="visually-hidden" htmlFor={`status-${request.id}`}>Status for request from {request.studentName}</label><select id={`status-${request.id}`} className="status-select" value={request.status ?? 'Pending'} disabled={busyRequestId === request.id} onChange={(event) => handleStatusChange(request.id, event.target.value)}>{REQUEST_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></div>
-                  <div className="request-queue__actions"><button className="icon-button" type="button" onClick={() => setActiveRequest(request)} aria-label={`View request from ${request.studentName}`}><Eye size={17} /></button><button className="icon-button icon-button--danger" type="button" disabled={busyRequestId === request.id} onClick={() => setDeleteCandidate(request)} aria-label={`Delete request from ${request.studentName}`}><Trash2 size={16} /></button></div>
+                  <div className="request-queue__status"><StatusBadge status={request.status} />{request.fee===450&&<Link to="/payments" className="text-link">{request.payment?.status||"Payment required"} · M450</Link>}<label className="visually-hidden" htmlFor={`status-${request.id}`}>Status for request from {request.studentName}</label><select id={`status-${request.id}`} className="status-select" value={request.status ?? 'Pending'} disabled={busyRequestId === request.id || request.fee===450&&request.payment?.status!=="Verified"} onChange={(event) => handleStatusChange(request.id, event.target.value)}>{REQUEST_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></div>
+                  <div className="request-queue__actions"><button className="icon-button" type="button" onClick={() => setActiveRequest(request)} aria-label={`View request from ${request.studentName}`}><Eye size={17} /></button><button className="icon-button icon-button--danger" type="button" disabled={busyRequestId === request.id || request.fee===450&&request.payment?.status!=="Awaiting payment"} onClick={() => setDeleteCandidate(request)} aria-label={`Delete request from ${request.studentName}`}><Trash2 size={16} /></button></div>
                 </article>
               ))}
             </div>
