@@ -44,6 +44,7 @@ function PersonDialog({ person, section, isSelf, onClose, onSave }) {
     status: person?.status || 'Active',
   }));
   const [error, setError] = useState('');
+  const [saving,setSaving]=useState(false);
   const editing = Boolean(person);
   const role = section === 'students' ? 'student' : form.role;
 
@@ -57,16 +58,17 @@ function PersonDialog({ person, section, isSelf, onClose, onSave }) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
     setError('');
+    setSaving(true);
     try {
-      onSave({ ...form, role });
+      await onSave({ ...form, role });
       dialog.current?.close();
       onClose();
     } catch (saveError) {
       setError(saveError.message || 'Unable to save this directory record.');
-    }
+    } finally { setSaving(false); }
   }
 
   return <dialog className="ax-dialog" ref={dialog} onCancel={onClose} onClose={onClose} aria-labelledby="person-dialog-title">
@@ -74,7 +76,7 @@ function PersonDialog({ person, section, isSelf, onClose, onSave }) {
     <form className="ax-form" onSubmit={submit}>
       {section !== 'students' && <label>Account role<select value={form.role} disabled={isSelf} onChange={(event) => change('role', event.target.value)}><option value="lecturer">Lecturer</option><option value="admin">Administrator</option></select></label>}
       <label>Full name<input autoFocus required maxLength={80} value={form.name} onChange={(event) => change('name', event.target.value)} placeholder="e.g. Naledi Ralefala" /></label>
-      <label>Email address<input required type="email" maxLength={254} value={form.email} onChange={(event) => change('email', event.target.value)} placeholder="name@limkokwing.ac.ls" /></label>
+      <label>Email address<input required type="email" disabled={editing} maxLength={254} value={form.email} onChange={(event) => change('email', event.target.value)} placeholder="name@limkokwing.ac.ls" /></label>
       {role === 'student' && <label>Student number<input required inputMode="numeric" pattern="90101[0-9]{4}" minLength={9} maxLength={9} value={form.studentNumber} onChange={(event) => change('studentNumber', event.target.value.replace(/\D/g, '').slice(0, 9))} placeholder="90101XXXX" /><small>Exactly 9 digits, beginning with 90101.</small></label>}
       {role !== 'admin' && <label>Faculty<select required value={form.faculty} onChange={(event) => change('faculty', event.target.value)}><option value="">Choose a faculty</option>{FACULTIES.map((faculty) => <option key={faculty.code} value={faculty.code}>{faculty.code} · {faculty.name}</option>)}</select></label>}
       {role === 'student' && <>
@@ -82,9 +84,9 @@ function PersonDialog({ person, section, isSelf, onClose, onSave }) {
         <label>Study year<select required value={form.year} onChange={(event) => change('year', event.target.value)}>{Array.from({ length: 8 }, (_, index) => `Year ${index + 1}`).map((year) => <option key={year}>{year}</option>)}</select></label>
       </>}
       <label>Account status<select value={form.status} disabled={isSelf} onChange={(event) => change('status', event.target.value)}><option>Active</option><option>Suspended</option></select></label>
-      <label>Demo sign-in password<input type="password" required={!editing} minLength={6} maxLength={128} autoComplete="new-password" value={form.password} onChange={(event) => change('password', event.target.value)} placeholder={editing ? 'Leave blank to keep current password' : 'At least 6 characters'} /><small>Passwords are stored only in this browser for the demo.</small></label>
+      {!editing && <label>Initial sign-in password<input type="password" required minLength={8} maxLength={128} autoComplete="new-password" value={form.password} onChange={event=>change('password',event.target.value)} placeholder="At least 8 characters" /><small>Managed by Firebase Authentication, not stored in the directory.</small></label>}
       {error && <p className="ax-form-error" role="alert">{error}</p>}
-      <div className="ax-dialog__actions"><button className="ax-button ax-button--quiet" type="button" onClick={() => dialog.current?.close()}>Cancel</button><button className="ax-button" type="submit">{editing ? 'Save changes' : 'Add record'}</button></div>
+      <div className="ax-dialog__actions"><button className="ax-button ax-button--quiet" type="button" onClick={() => dialog.current?.close()}>Cancel</button><button className="ax-button" type="submit" disabled={saving}>{saving ? "Saving…" : editing ? 'Save changes' : 'Add record'}</button></div>
     </form>
   </dialog>;
 }
@@ -117,26 +119,26 @@ function Workspace({ view, search }) {
   const staffRows = directory.filter((person) => person.role !== 'student' && (!roleFilter || person.role === roleFilter) && (!faculty || person.role !== 'lecturer' || person.faculty === faculty) && [person.name, person.email, person.faculty, person.role].join(' ').toLowerCase().includes(query.toLowerCase()));
   const facultyTable = <Table headers={['Code', 'Faculty', 'Students', 'Lecturers']} rows={counts.map(([code, name, studentCount, lecturerCount]) => ({ key: code, cells: [code, name, studentCount, lecturerCount] }))} />;
 
-  function savePerson(values) {
-    if (editing?.person) updateDirectoryPerson(editing.person.id, values, { actingUserId });
-    else createDirectoryPerson(values);
+  async function savePerson(values) {
+    if (editing?.person) await updateDirectoryPerson(editing.person.id, values, { actingUserId });
+    else await createDirectoryPerson(values);
     setEditing(null);
-    setActionMessage(`${values.role === 'student' ? 'Student' : values.role === 'lecturer' ? 'Lecturer' : 'Administrator'} ${editing?.person ? 'updated' : 'added'} in this browser.`);
+    setActionMessage(`${values.role === 'student' ? 'Student' : values.role === 'lecturer' ? 'Lecturer' : 'Administrator'} ${editing?.person ? 'updated' : 'added'} in Firebase.`);
   }
 
-  function removePerson(person) {
+  async function removePerson(person) {
     const label = person.role === 'student' ? `student ${person.name} (${person.studentNumber})` : `${person.role === 'admin' ? 'administrator' : 'lecturer'} ${person.name} (${person.email})`;
-    if (!window.confirm(`Delete ${label}? This cannot be undone in this browser.`)) return;
+    if (!window.confirm(`Delete ${label}? This removes portal access and the directory record.`)) return;
     try {
-      deleteDirectoryPerson(person.id, { actingUserId });
-      setActionMessage(`${person.name} was deleted from this browser's demo directory.`);
+      await deleteDirectoryPerson(person.id, { actingUserId });
+      setActionMessage(`${person.name} was removed from the Firebase directory.`);
     } catch (error) {
       setActionMessage(error.message || 'Unable to delete this record.');
     }
   }
 
-  const actionButtons = (person) => <div className="ax-row-actions"><button className="ax-button--quiet" type="button" onClick={() => setEditing({ person, section: person.role === 'student' ? 'students' : 'staff' })} aria-label={`Edit ${person.name}`}><Pencil size={14} />Edit</button><button className="ax-button--danger" type="button" onClick={() => removePerson(person)} aria-label={`Delete ${person.name}`}><Trash2 size={14} />Delete</button></div>;
-  const notice = <><p className="ax-notice" role="note"><strong>Demo directory — browser-local only</strong>Records and demo passwords are stored in this browser and are not shared with other users or Firebase. This does not create real university accounts and is not production-grade access control.</p>{actionMessage && <p role="status">{actionMessage}</p>}</>;
+  const actionButtons = (person) => person.bootstrap ? <span>Firebase administrator</span> : <div className="ax-row-actions"><button className="ax-button--quiet" type="button" onClick={() => setEditing({ person, section: person.role === 'student' ? 'students' : 'staff' })} aria-label={`Edit ${person.name}`}><Pencil size={14} />Edit</button><button className="ax-button--danger" type="button" onClick={() => removePerson(person)} aria-label={`Delete ${person.name}`}><Trash2 size={14} />Delete</button></div>;
+  const notice = <>{directory.error && <p className="ax-notice" role="alert">Firebase directory unavailable: {directory.error}</p>}{actionMessage && <p role="status">{actionMessage}</p>}</>;
   const modal = editing && <PersonDialog person={editing.person} section={editing.section} isSelf={editing.person?.id === actingUserId} onSave={savePerson} onClose={() => setEditing(null)} />;
 
   if (!view && !search) return <>
@@ -149,7 +151,7 @@ function Workspace({ view, search }) {
     {notice}
     <Card title="Quick Actions"><div className="ax-actions"><Link to={link('students')}>Manage Students</Link><Link to={link('staff')}>Manage Lecturers & Admins</Link><Link to={link('academics')}>Academic Structure</Link><Link to="/requests">Review Service Requests</Link><Link to={link('reports')}>Generate Reports</Link></div></Card>
     <Card title="Faculty Overview">{facultyTable}</Card>
-    <div className="ax-grid"><Card title="Service Requests"><p>Review submitted requests in the existing Firebase request manager.</p><Link className="ax-btn" to="/requests">Open request manager</Link></Card><Card title="System Overview"><p>{students.length} student records, {lecturers.length} lecturers, and {admins.length} administrators in this browser's demo directory.</p><p>Live fees and activity logs are not connected.</p><Link to={link('access')}>Review role permissions</Link></Card></div>
+    <div className="ax-grid"><Card title="Service Requests"><p>Review submitted requests in the existing Firebase request manager.</p><Link className="ax-btn" to="/requests">Open request manager</Link></Card><Card title="System Overview"><p>{students.length} student records, {lecturers.length} lecturers, and {admins.length} administrators in the Firebase directory.</p><p>Live fees and activity logs are not connected.</p><Link to={link('access')}>Review role permissions</Link></Card></div>
   </>;
 
   if (view === 'students' || (!view && search)) return <>
@@ -168,16 +170,16 @@ function Workspace({ view, search }) {
 
   if (view === 'academics') return <Card title="Faculties">{facultyTable}</Card>;
   if (view === 'courses') return <Card title="Teaching Allocation"><Table headers={['Faculty', 'Lecturer', 'Students']} rows={lecturers.map((person) => ({ key: person.id, cells: [person.faculty, person.name, students.filter((student) => student.faculty === person.faculty).length] }))} /></Card>;
-  if (view === 'access') return <><p className="ax-notice"><strong>Role access is for demonstration only</strong>The portal uses browser-local demo sessions. Do not use this client-side role management to protect real student information.</p><Card title="Role Permissions"><Table headers={['Role', 'Workspace', 'Scope']} rows={[
-    { key: 'student', cells: ['Student', 'Student services', 'Own demo record'] },
+  if (view === 'access') return <><Card title="Role Permissions"><Table headers={['Role', 'Workspace', 'Scope']} rows={[
+    { key: 'student', cells: ['Student', 'Student services', 'Own profile'] },
     { key: 'lecturer', cells: ['Lecturer', 'Teaching', 'Faculty directory'] },
     { key: 'admin', cells: ['Administrator', 'Administration', 'Directory and service requests'] },
   ]} /></Card></>;
   if (view === 'reports') return <><Card title="Faculty Enrollment">{facultyTable}<button type="button" onClick={() => exportCsv('faculty-enrollment.csv', [['Faculty', 'Students', 'Lecturers'], ...counts.map(([code, , studentCount, lecturerCount]) => [code, studentCount, lecturerCount])])}>Export enrollment</button></Card><Card title="Enrollment Distribution">{counts.map(([code, name, count]) => <div key={code} style={{ marginBottom: 12 }}><p>{code} · {name} · {count} students</p><div style={{ background: '#e7effb', height: 12, borderRadius: 6 }}><div style={{ background: '#1858b8', height: 12, borderRadius: 6, width: `${students.length ? (count / students.length) * 100 : 0}%` }} /></div></div>)}</Card></>;
   if (view === 'fees') return <Card title="Fee Enquiries"><p>No verified fee ledger is connected. Review fee-related service requests in the request manager.</p><Link className="ax-btn" to="/requests">Open requests</Link></Card>;
   return <Card title="System Configuration"><Table headers={['Setting', 'Value']} rows={[
-    { key: 'auth', cells: ['Authentication', 'Browser-local demo'] },
-    { key: 'directory', cells: ['Directory storage', 'This browser only'] },
+    { key: 'auth', cells: ['Authentication', 'Firebase Authentication'] },
+    { key: 'directory', cells: ['Directory storage', 'Cloud Firestore'] },
     { key: 'faculty', cells: ['Faculties', FACULTIES.length] },
-  ]} /><p>Directory accounts are not provisioned in Firebase Authentication.</p></Card>;
+  ]} /><p>New accounts are provisioned in Firebase Authentication; deleting the directory profile revokes portal access.</p></Card>;
 }
