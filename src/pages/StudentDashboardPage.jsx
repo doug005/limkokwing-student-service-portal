@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, ClipboardList, Copy, FileText, GraduationCap, Grid2X2, Library, Megaphone, QrCode, Receipt, UserRound, Wallet } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { getFacultyByCode } from '../data/students.js';
 import { useDirectory } from '../services/directoryStore.js';
 import { useRoleSession } from '../services/roleAuth.js';
@@ -9,7 +9,7 @@ const quickActions = [
   { label: 'Course Registration', icon: UserRound, to: '/dashboard/student?view=registration' },
   { label: 'Timetable', icon: CalendarDays, to: '/dashboard/student?view=timetable' },
   { label: 'Results & Grades', icon: BarChartIcon, to: '/dashboard/student?view=results' },
-  { label: 'Fees & Payments', icon: Wallet, to: '/dashboard/student?view=payments' },
+  { label: 'Fees & Payments', icon: Wallet, to: '/payments' },
   { label: 'Assignments', icon: ClipboardList, to: '/dashboard/student?view=assignments' },
   { label: 'Applications', icon: FileText, to: '/request' },
   { label: 'Notifications', icon: Bell, to: '/dashboard/student?view=notifications' },
@@ -45,6 +45,7 @@ export default function StudentDashboardPage() {
 
   if (!student) return <section className="reference-dashboard"><div className="reference-empty">Student record unavailable.</div></section>;
 
+  if (view === 'payments') return <Navigate to="/payments" replace />;
   if (view === 'attendance') return <section className="reference-dashboard"><Link to="/dashboard/student">Return to dashboard</Link></section>;
   if (view || window.location.hash === '#profile') return <AcademicWorkspace key={view || 'profile'} view={view || 'profile'} student={student}/>;
   const viewContent = {
@@ -52,7 +53,7 @@ export default function StudentDashboardPage() {
     timetable: { title: 'Academic timetable', text: 'Your upcoming classes are shown below. Use the timetable links to keep your weekly schedule close.', action: <a className="reference-primary-button" href="#timetable">Jump to timetable <ArrowRight size={15} /></a> },
     attendance: { title: 'QR attendance check-in', text: attendanceCheckedIn ? 'Attendance check-in recorded for today in this demo session.' : 'Use the button to record today’s attendance check-in in this demo workspace.', action: <button className="reference-primary-button" type="button" onClick={() => setAttendanceCheckedIn(true)}>{attendanceCheckedIn ? 'Checked in today' : 'Start check-in'} <CheckCircle2 size={15} /></button> },
     results: { title: 'Results & grades', text: `Current academic standing: ${student.year}. Results and grade enquiries can be sent to the Registration Office.`, action: <Link className="reference-primary-button" to="/request?service=academic-transcript">Request academic transcript <ArrowRight size={15} /></Link> },
-    payments: { title: 'Fees & payments', text: 'Outstanding balance: M2,450.00. Submit a fee enquiry to the responsible university office for payment assistance.', action: <Link className="reference-primary-button" to="/request?service=general-enquiry">Open fee enquiry <ArrowRight size={15} /></Link> },
+    payments: { title: 'Fees & payments', text: 'No standing service balance. Card replacements cost M450.00 per request.', action: <Link className="reference-primary-button" to="/request?service=general-enquiry">Open fee enquiry <ArrowRight size={15} /></Link> },
     assignments: { title: 'Assignments', text: 'Your current course assignments are tracked through your course workspace. Use the request form for assignment support.', action: <Link className="reference-primary-button" to="/request?service=general-enquiry">Ask for assignment support <ArrowRight size={15} /></Link> },
     notifications: { title: 'Notifications', text: 'You are all caught up. New service updates, request changes, and academic notices will appear here.', action: <Link className="reference-primary-button" to="/requests">View request updates <ArrowRight size={15} /></Link> },
     announcements: { title: 'Announcements', text: 'There are no new announcements in this demo workspace. Check the services directory for the latest support routes.', action: <Link className="reference-primary-button" to="/services">Open services <ArrowRight size={15} /></Link> },
@@ -79,7 +80,7 @@ export default function StudentDashboardPage() {
 
       <section className="student-profile-card reference-card">
         <div className="student-profile-card__identity"><div className="student-profile-card__avatar">{student.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</div><div><h2>{student.name}</h2><p className="student-profile-card__matric">Matric Number: <strong>{student.studentNumber}</strong> <button type="button" onClick={copyStudentNumber} aria-label="Copy student number"><Copy size={15} /></button>{copied && <span className="copy-feedback">Copied</span>}</p><p><GraduationCap size={17} /> <span>Programme: <strong>{student.programme}</strong></span></p><p><Library size={17} /> <span>Faculty: <strong>{faculty?.name || student.faculty}</strong></span></p><p><BarChartIcon width={18} height={18} /> <span>Level: <strong>{student.year}</strong></span></p></div></div>
-        <div className="student-profile-card__summary"><div><Wallet size={25} /><span>Outstanding Fees<strong>M2,450.00</strong></span><Link to="/dashboard/student?view=payments">Make Payment</Link></div><div><CalendarDays size={25} /><span>Current Semester<strong>{student.year}, Semester 1</strong></span><b className="status-pill status-pill--active"><CheckCircle2 size={14} /> Active</b></div></div>
+        <div className="student-profile-card__summary"><div><Wallet size={25} /><span>Standing service balance<strong>M0.00</strong></span><Link to="/payments">Service Payments</Link></div><div><CalendarDays size={25} /><span>Current Semester<strong>{student.year}, Semester 1</strong></span><b className="status-pill status-pill--active"><CheckCircle2 size={14} /> Active</b></div></div>
       </section>
 
 
